@@ -7,8 +7,13 @@ from functools import wraps
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from db.users import get_user, is_member, check_and_increment_usage, upsert_user
 from config.settings import DAILY_USAGE_LIMIT
+
+_JOIN_KB = InlineKeyboardMarkup([
+    [InlineKeyboardButton("💰 开通会员", callback_data="join_member")],
+])
 
 
 def require_membership(func):
@@ -26,9 +31,9 @@ def require_membership(func):
         if not is_member(user):
             await update.effective_message.reply_text(
                 "🔒 *此功能需要会员权限*\n\n"
-                "请联系 @laowang\\_admin 开通会员，解锁全部 AI 工具。\n\n"
-                "发送 /start 查看功能介绍。",
+                "开通会员即可解锁全部 10 个 AI 工具。",
                 parse_mode="Markdown",
+                reply_markup=_JOIN_KB,
             )
             return ConversationHandler.END
 

@@ -12,7 +12,7 @@ from telegram import Bot
 from telegram.error import TelegramError
 
 from config.settings import SCHEDULER_TIMEZONE
-from db.users import get_all_active_members
+from db.users import get_all_active_members, get_expiring_members
 from db.news_cache import get_cached_summary, save_cache
 from services.news_fetcher import fetch_daily_news, format_articles_for_claude
 from services.market_data import get_market_snapshot, format_snapshot_for_claude
@@ -108,6 +108,25 @@ async def job_postmarket_intel(bot: Bot):
     await _broadcast(bot, summary, "postmarket_intel")
 
 
+async def job_membership_reminder(bot: Bot):
+    """Remind members whose membership expires within 3 days."""
+    expiring = get_expiring_members(days=3)
+    for member in expiring:
+        try:
+            await bot.send_message(
+                chat_id=member["id"],
+                text=(
+                    "⏰ *会员到期提醒*\n\n"
+                    "你的老王工具箱会员即将到期，续费后可继续使用全部 AI 工具。\n\n"
+                    "请联系 @scorpia2004 续费 🙏"
+                ),
+                parse_mode="Markdown",
+            )
+        except TelegramError as e:
+            logger.warning("Expiry reminder skipped user %s: %s", member["id"], e)
+    logger.info("membership_reminder: notified %d expiring members", len(expiring))
+
+
 def setup_scheduler(bot: Bot) -> AsyncIOScheduler:
     scheduler = AsyncIOScheduler(timezone=SCHEDULER_TIMEZONE)
 
@@ -132,6 +151,14 @@ def setup_scheduler(bot: Bot) -> AsyncIOScheduler:
         lambda: asyncio.create_task(job_postmarket_intel(bot)),
         CronTrigger(hour=16, minute=30, day_of_week="mon-fri", timezone=SCHEDULER_TIMEZONE),
         id="postmarket_intel",
+        replace_existing=True,
+    )
+
+    # Membership expiry reminder — 10:00 AM ET daily
+    scheduler.add_job(
+        lambda: asyncio.create_task(job_membership_reminder(bot)),
+        CronTrigger(hour=10, minute=0, timezone=SCHEDULER_TIMEZONE),
+        id="membership_reminder",
         replace_existing=True,
     )
 

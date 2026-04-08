@@ -82,6 +82,37 @@ def get_all_active_members() -> list[dict]:
     return result.data or []
 
 
+def get_expiring_members(days: int = 3) -> list[dict]:
+    """Returns members whose membership expires within the given number of days."""
+    from datetime import datetime, timedelta, timezone
+    db = get_client()
+    now = datetime.now(timezone.utc)
+    cutoff = (now + timedelta(days=days)).isoformat()
+    result = (
+        db.table("users")
+        .select("id, username, membership_expires_at")
+        .eq("membership_status", "member")
+        .eq("is_active", True)
+        .not_.is_("membership_expires_at", "null")
+        .lte("membership_expires_at", cutoff)
+        .gte("membership_expires_at", now.isoformat())
+        .execute()
+    )
+    return result.data or []
+
+
+def get_admin_ids() -> list[int]:
+    db = get_client()
+    result = (
+        db.table("users")
+        .select("id")
+        .eq("membership_status", "admin")
+        .eq("is_active", True)
+        .execute()
+    )
+    return [r["id"] for r in (result.data or [])]
+
+
 def set_membership(user_id: int, status: str, expires_at: Optional[str] = None):
     db = get_client()
     db.table("users").update(

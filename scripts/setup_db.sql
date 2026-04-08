@@ -12,6 +12,9 @@ CREATE TABLE IF NOT EXISTS users (
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     daily_usage_count INTEGER NOT NULL DEFAULT 0,
     usage_reset_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    points INTEGER NOT NULL DEFAULT 0,             -- 积分
+    checkin_streak INTEGER NOT NULL DEFAULT 0,     -- 连续签到天数
+    last_checkin_date DATE,                        -- 最后签到日期
     notes TEXT                                     -- 管理员备注
 );
 
@@ -58,6 +61,17 @@ CREATE TABLE IF NOT EXISTS checkin_logs (
     claude_response TEXT,            -- Claude 的反馈
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE (user_id, checkin_date)
+);
+
+-- ── 1v1 咨询预约 ──────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS consultation_bookings (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    package TEXT NOT NULL,                -- 'consult_30' | 'consult_60' | 'consult_vip'
+    topic TEXT,                           -- 用户填写的咨询主题
+    status TEXT NOT NULL DEFAULT 'pending', -- 'pending' | 'confirmed' | 'completed' | 'cancelled'
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    notes TEXT                            -- 管理员备注
 );
 
 -- ── 调度器运行日志 ────────────────────────────────────────────────────────────

@@ -8,16 +8,19 @@ def get_cached_summary(category: str, cache_date: Optional[date] = None) -> Opti
     if cache_date is None:
         cache_date = date.today()
     db = get_client()
-    result = (
-        db.table("news_cache")
-        .select("claude_summary")
-        .eq("cache_date", cache_date.isoformat())
-        .eq("category", category)
-        .maybe_single()
-        .execute()
-    )
-    if result.data:
-        return result.data["claude_summary"]
+    try:
+        result = (
+            db.table("news_cache")
+            .select("claude_summary")
+            .eq("cache_date", cache_date.isoformat())
+            .eq("category", category)
+            .maybe_single()
+            .execute()
+        )
+        if result and result.data:
+            return result.data["claude_summary"]
+    except Exception:
+        pass
     return None
 
 

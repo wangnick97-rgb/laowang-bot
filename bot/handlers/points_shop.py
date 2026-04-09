@@ -10,46 +10,64 @@ from db.users import get_user
 
 # ── 分层商品 ──────────────────────────────────────────────────────────────────
 
-# 所有人可见可兑
+# ── 通用道具（所有人可兑）──────────────────────────────────────────────────
 REWARDS_ALL = [
     {"id": "shield_1", "name": "🛡️ 签到保护卡 ×1", "cost": 80, "desc": "断签时自动保护连续天数", "tier": "all"},
     {"id": "health_shield", "name": "❤️ 健康保护卡 ×1", "cost": 80, "desc": "健康断签时保护连续天数", "tier": "all"},
     {"id": "extra_5", "name": "📱 额外5次/天使用额度", "cost": 100, "desc": "当日AI使用上限+5", "tier": "all"},
 ]
 
-# 免费用户专区 — 吸引持续签到
+# ── 免费用户专区 — 实用好物+数字资源 ────────────────────────────────────────
 REWARDS_FREE = [
-    {"id": "book_1", "name": "📚 老王推荐书单(电子版)", "cost": 200, "desc": "老王精选10本必读书PDF", "tier": "free"},
-    {"id": "template_1", "name": "📋 商业计划书模板", "cost": 300, "desc": "老王亲用的BP模板", "tier": "free"},
+    # 数字资源（低门槛，1-2周可得）
+    {"id": "wallpaper_1", "name": "🖼️ 老王自律壁纸包", "cost": 100, "desc": "12张高清暗黑系手机壁纸", "tier": "free"},
     {"id": "checklist_1", "name": "✅ 创业检查清单", "cost": 150, "desc": "从0到1创业50项checklist", "tier": "free"},
-    {"id": "wallpaper_1", "name": "🖼️ 老王自律壁纸包", "cost": 100, "desc": "12张高清手机壁纸", "tier": "free"},
+    {"id": "book_1", "name": "📚 老王推荐书单", "cost": 200, "desc": "老王精选10本必读书+批注PDF", "tier": "free"},
+    {"id": "template_1", "name": "📋 商业计划书模板", "cost": 300, "desc": "老王亲用的BP模板+填写指南", "tier": "free"},
+    {"id": "notion_1", "name": "📓 老王Notion效率模板", "cost": 250, "desc": "GTD+OKR+周复盘全套模板", "tier": "free"},
     {"id": "member_7", "name": "💎 会员体验7天", "cost": 500, "desc": "免费体验全部会员功能", "tier": "free"},
-    {"id": "earphone_1", "name": "🎧 蓝牙运动耳机", "cost": 2000, "desc": "实物奖品 (包邮)", "tier": "free"},
-    {"id": "kindle_1", "name": "📖 Kindle Paperwhite", "cost": 5000, "desc": "实物奖品 (包邮)", "tier": "free"},
-    {"id": "keyboard_1", "name": "⌨️ 机械键盘", "cost": 3000, "desc": "实物奖品 (包邮)", "tier": "free"},
+    # 实物（1-3个月可得）
+    {"id": "band_1", "name": "⌚ 小米手环9", "cost": 1500, "desc": "运动+睡眠监测 (包邮)", "tier": "free"},
+    {"id": "earphone_1", "name": "🎧 Redmi Buds 5 Pro", "cost": 2000, "desc": "主动降噪无线耳机 (包邮)", "tier": "free"},
+    {"id": "keyboard_1", "name": "⌨️ 洛斐机械键盘", "cost": 2500, "desc": "复古圆键帽蓝牙键盘 (包邮)", "tier": "free"},
+    {"id": "lamp_1", "name": "💡 明基ScreenBar屏幕灯", "cost": 3000, "desc": "护眼办公神器 (包邮)", "tier": "free"},
+    {"id": "kindle_1", "name": "📖 Kindle Paperwhite", "cost": 5000, "desc": "电纸书阅读器 (包邮)", "tier": "free"},
 ]
 
-# 会员专区 — 高端数码
+# ── 会员专区 — 高端数码+服务 ────────────────────────────────────────────────
 REWARDS_MEMBER = [
+    # 服务类（快速可得）
     {"id": "member_30", "name": "💎 会员延期30天", "cost": 500, "desc": "会员有效期+30天", "tier": "member"},
+    {"id": "consult_discount", "name": "🎯 咨询9折券", "cost": 600, "desc": "1v1咨询享9折优惠", "tier": "member"},
     {"id": "consult_15", "name": "🎯 15分钟快速咨询", "cost": 800, "desc": "老王1v1语音15min", "tier": "member"},
-    {"id": "consult_discount", "name": "🎯 咨询9折券", "cost": 600, "desc": "1v1咨询享9折", "tier": "member"},
-    {"id": "airpods_1", "name": "🎧 AirPods Pro", "cost": 8000, "desc": "实物奖品 (包邮)", "tier": "member"},
-    {"id": "ipad_1", "name": "📱 iPad Air", "cost": 15000, "desc": "实物奖品 (包邮)", "tier": "member"},
-    {"id": "iphone_1", "name": "📱 iPhone 16", "cost": 25000, "desc": "实物奖品 (包邮)", "tier": "member"},
-    {"id": "macbook_1", "name": "💻 MacBook Air M3", "cost": 40000, "desc": "实物奖品 (包邮)", "tier": "member"},
+    # 中端数码（2-4个月）
+    {"id": "charger_1", "name": "🔋 Anker 氮化镓充电器套装", "cost": 2000, "desc": "140W充电器+C-C线 (包邮)", "tier": "member"},
+    {"id": "mouse_1", "name": "🖱️ 罗技MX Master 3S", "cost": 3000, "desc": "顶级办公鼠标 (包邮)", "tier": "member"},
+    {"id": "speaker_1", "name": "🔊 Marshall Stanmore II", "cost": 5000, "desc": "复古蓝牙音箱 (包邮)", "tier": "member"},
+    # 高端数码（4-12个月）
+    {"id": "airpods_1", "name": "🎧 AirPods Pro 3", "cost": 8000, "desc": "降噪+心率监测 (包邮)", "tier": "member"},
+    {"id": "watch_1", "name": "⌚ Apple Watch Series 10", "cost": 10000, "desc": "健康+运动全能 (包邮)", "tier": "member"},
+    {"id": "ipad_1", "name": "📱 iPad Air M3", "cost": 15000, "desc": "生产力平板 (包邮)", "tier": "member"},
+    {"id": "iphone_1", "name": "📱 iPhone 16 Pro", "cost": 20000, "desc": "旗舰手机 (包邮)", "tier": "member"},
+    {"id": "macbook_1", "name": "💻 MacBook Air M5", "cost": 30000, "desc": "轻薄生产力笔记本 (包邮)", "tier": "member"},
+    {"id": "sony_1", "name": "🎧 Sony WH-1000XM5", "cost": 6000, "desc": "旗舰头戴降噪耳机 (包邮)", "tier": "member"},
 ]
 
-# 私董会专区 — 顶级权益
+# ── 私董会专区 — 顶级权益+高端体验 ──────────────────────────────────────────
 REWARDS_VIP = [
-    {"id": "claude_3m", "name": "🤖 Claude Pro 3个月", "cost": 5000, "desc": "价值$60的Claude会员", "tier": "vip"},
-    {"id": "chatgpt_3m", "name": "🤖 ChatGPT Plus 3个月", "cost": 5000, "desc": "价值$60的GPT会员", "tier": "vip"},
+    # AI订阅（快速可得）
     {"id": "vip_extend_30", "name": "👑 私董会延期30天", "cost": 3000, "desc": "私董会有效期+30天", "tier": "vip"},
-    {"id": "offline_meet", "name": "🤝 老王线下交流会名额", "cost": 15000, "desc": "限定城市线下见面会1位", "tier": "vip"},
-    {"id": "cash_100", "name": "💵 现金$100", "cost": 20000, "desc": "直接提现到支付宝/微信", "tier": "vip"},
-    {"id": "cash_500", "name": "💵 现金$500", "cost": 80000, "desc": "直接提现到支付宝/微信", "tier": "vip"},
-    {"id": "dinner_wang", "name": "🍽️ 和老王吃饭", "cost": 50000, "desc": "老王请你吃饭+2小时深度交流", "tier": "vip"},
-    {"id": "mentorship_1m", "name": "🧠 老王1个月导师计划", "cost": 100000, "desc": "每周1次30min通话+随时微信答疑", "tier": "vip"},
+    {"id": "claude_3m", "name": "🤖 Claude Pro 3个月", "cost": 5000, "desc": "价值$60的Claude Max会员", "tier": "vip"},
+    {"id": "chatgpt_3m", "name": "🤖 ChatGPT Plus 3个月", "cost": 5000, "desc": "价值$60的GPT Plus会员", "tier": "vip"},
+    {"id": "cursor_3m", "name": "💻 Cursor Pro 3个月", "cost": 5000, "desc": "AI编程工具会员", "tier": "vip"},
+    # 现金+体验（3-8个月）
+    {"id": "cash_100", "name": "💵 现金$100", "cost": 15000, "desc": "直接提现到支付宝/微信", "tier": "vip"},
+    {"id": "offline_meet", "name": "🤝 老王线下交流会", "cost": 15000, "desc": "限定城市线下见面会1位", "tier": "vip"},
+    {"id": "dinner_wang", "name": "🍽️ 和老王吃饭", "cost": 30000, "desc": "老王请客+2小时深度交流", "tier": "vip"},
+    {"id": "cash_500", "name": "💵 现金$500", "cost": 50000, "desc": "直接提现到支付宝/微信", "tier": "vip"},
+    # 顶级（6-12个月+）
+    {"id": "mentorship_1m", "name": "🧠 老王1个月导师计划", "cost": 60000, "desc": "每周1次30min通话+微信随时答疑", "tier": "vip"},
+    {"id": "macpro_1", "name": "💻 MacBook Pro M5 Pro", "cost": 80000, "desc": "顶配生产力笔记本 (包邮)", "tier": "vip"},
 ]
 
 # 合并用于兑换查找

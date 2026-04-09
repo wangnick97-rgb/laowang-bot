@@ -204,12 +204,20 @@ def build_member_menu() -> InlineKeyboardMarkup:
 
 
 def build_rewards_menu() -> InlineKeyboardMarkup:
-    keyboard = [
-        [InlineKeyboardButton("🛍️ 积分商城", callback_data="feature_points")],
+    from config.settings import WEBAPP_URL
+    keyboard = []
+    if WEBAPP_URL:
+        keyboard.append([InlineKeyboardButton(
+            "🛍️ 积分商城",
+            web_app=WebAppInfo(url=f"{WEBAPP_URL}/webapp/shop.html"),
+        )])
+    else:
+        keyboard.append([InlineKeyboardButton("🛍️ 积分商城", callback_data="feature_points")])
+    keyboard.extend([
         [InlineKeyboardButton("🎯 挑战任务", callback_data="feature_challenge")],
         [InlineKeyboardButton("👥 邀请好友", callback_data="feature_invite")],
         [InlineKeyboardButton("← 返回会员中心", callback_data="menu_member")],
-    ]
+    ])
     return InlineKeyboardMarkup(keyboard)
 
 

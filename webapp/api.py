@@ -231,6 +231,68 @@ async def api_badges(user: dict = Depends(get_current_user)):
 
 # ── Health check ─────────────────────────────────────────────────────────────
 
+@app.get("/api/shop")
+async def api_shop(user: dict = Depends(get_current_user)):
+    """积分商城 — 按tier返回可见商品。"""
+    from bot.handlers.points_shop import REWARDS_ALL, REWARDS_FREE, REWARDS_MEMBER, REWARDS_VIP
+    user_id = user["id"]
+    db = get_client()
+
+    row = db.table("users").select("points, membership_tier, membership_status").eq("id", user_id).maybe_single().execute()
+    u = row.data or {}
+    points = u.get("points", 0) or 0
+    tier = u.get("membership_tier", "free")
+    if u.get("membership_status") == "admin":
+        tier = "admin"
+
+    sections = []
+    sections.append({"title": "🔧 通用道具", "items": REWARDS_ALL})
+    sections.append({"title": "🎁 好物兑换", "items": REWARDS_FREE})
+
+    if tier in ("member", "vip", "admin"):
+        sections.append({"title": "💎 会员专区", "items": REWARDS_MEMBER})
+    if tier in ("vip", "admin"):
+        sections.append({"title": "👑 私董会专区", "items": REWARDS_VIP})
+
+    return {"points": points, "tier": tier, "sections": sections}
+
+
+@app.post("/api/redeem")
+async def api_redeem(request: Request, user: dict = Depends(get_current_user)):
+    """积分兑换。"""
+    from bot.handlers.points_shop import ALL_REWARDS, _can_access
+    from db.points import redeem_points
+    body = await request.json()
+    reward_id = body.get("id", "")
+    user_id = user["id"]
+
+    reward = next((r for r in ALL_REWARDS if r["id"] == reward_id), None)
+    if not reward:
+        raise HTTPException(status_code=400, detail="Invalid reward")
+
+    db = get_client()
+    row = db.table("users").select("membership_tier, membership_status").eq("id", user_id).maybe_single().execute()
+    u = row.data or {}
+    tier = u.get("membership_tier", "free")
+    if u.get("membership_status") == "admin":
+        tier = "admin"
+
+    if not _can_access(tier, reward["tier"]):
+        raise HTTPException(status_code=403, detail="Tier too low")
+
+    success = redeem_points(user_id, reward["cost"], reward["name"])
+    if not success:
+        raise HTTPException(status_code=400, detail="Insufficient points")
+
+    # Get updated points
+    info = db.table("users").select("points").eq("id", user_id).maybe_single().execute()
+    new_points = (info.data or {}).get("points", 0)
+
+    return {"success": True, "remaining_points": new_points, "reward": reward["name"]}
+
+
+# ── Health check ─────────────────────────────────────────────────────────────
+
 @app.get("/health")
 async def health_check():
     return {"status": "ok"}

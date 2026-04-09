@@ -180,12 +180,12 @@ def build_member_menu() -> InlineKeyboardMarkup:
     from config.settings import WEBAPP_URL
     keyboard = []
 
-    # Mini App 数据面板按钮（仅在配置了WEBAPP_URL时显示）
+    # Mini App 按钮（仅在配置了WEBAPP_URL时显示）
     if WEBAPP_URL:
-        keyboard.append([InlineKeyboardButton(
-            "📊 数据面板",
-            web_app=WebAppInfo(url=f"{WEBAPP_URL}/webapp/index.html"),
-        )])
+        keyboard.append([
+            InlineKeyboardButton("📊 数据面板", web_app=WebAppInfo(url=f"{WEBAPP_URL}/webapp/index.html")),
+            InlineKeyboardButton("🛍️ 积分商城", web_app=WebAppInfo(url=f"{WEBAPP_URL}/webapp/shop.html")),
+        ])
 
     keyboard.extend([
         [InlineKeyboardButton("🪙 我的积分", callback_data="feature_points"),

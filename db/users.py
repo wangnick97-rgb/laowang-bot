@@ -42,11 +42,14 @@ def is_member(user: dict) -> bool:
     return expiry_dt > datetime.now(timezone.utc)
 
 
-def check_and_increment_usage(user_id: int) -> bool:
+def check_and_increment_usage(user_id: int, limit: int = None) -> bool:
     """
     Returns True if user is within daily limit, and increments their count.
     Returns False if limit exceeded.
     """
+    if limit is None:
+        limit = DAILY_USAGE_LIMIT
+
     db = get_client()
     user = get_user(user_id)
     if not user:
@@ -60,7 +63,7 @@ def check_and_increment_usage(user_id: int) -> bool:
         ).eq("id", user_id).execute()
         user["daily_usage_count"] = 0
 
-    if user["daily_usage_count"] >= DAILY_USAGE_LIMIT:
+    if user["daily_usage_count"] >= limit:
         return False
 
     db.table("users").update(

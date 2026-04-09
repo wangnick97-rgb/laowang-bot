@@ -15,10 +15,15 @@ from db.users import get_user, is_member
 
 # 套餐定义
 PLANS = {
-    "month": {"name": "月度会员", "days": 30, "price": "$9.9"},
-    "quarter": {"name": "季度会员", "days": 90, "price": "$24.9"},
-    "year": {"name": "年度会员", "days": 365, "price": "$79.9"},
-    "week": {"name": "周体验", "days": 7, "price": "免费体验"},
+    # 普通会员
+    "month": {"name": "💎 月度会员", "days": 30, "price": "$9.9", "tier": "member"},
+    "quarter": {"name": "💎 季度会员", "days": 90, "price": "$24.9", "tier": "member"},
+    "year": {"name": "💎 年度会员", "days": 365, "price": "$79.9", "tier": "member"},
+    "week": {"name": "💎 周体验", "days": 7, "price": "免费体验", "tier": "member"},
+    # 私董会
+    "vip_month": {"name": "👑 私董会月度", "days": 30, "price": "$99", "tier": "vip"},
+    "vip_quarter": {"name": "👑 私董会季度", "days": 90, "price": "$249", "tier": "vip"},
+    "vip_year": {"name": "👑 私董会年度", "days": 365, "price": "$899", "tier": "vip"},
 }
 
 
@@ -168,9 +173,11 @@ async def cmd_activate(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     new_expires = (base + timedelta(days=days)).isoformat()
 
-    # 更新用户会员状态
+    # 更新用户会员状态+tier
+    tier = PLANS.get(code_data["plan_type"], {}).get("tier", "member")
     db.table("users").update({
         "membership_status": "member",
+        "membership_tier": tier,
         "membership_expires_at": new_expires,
     }).eq("id", user_id).execute()
 

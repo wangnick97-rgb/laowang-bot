@@ -27,7 +27,7 @@ from bot.handlers.sales_assist import build_handler as sales_handler
 from bot.handlers.property_diag import build_handler as property_handler
 from bot.handlers.landlord_msg import build_handler as landlord_handler
 from bot.handlers.daily_poll import cmd_vote, callback_vote
-from bot.handlers.wealth_static import show_portfolio, show_strategy, show_us_stock_guide
+from bot.handlers.wealth_static import show_portfolio, show_strategy, show_us_stock_guide, cmd_signal
 
 # ── 个人健康 handlers ────────────────────────────────────────────────────────
 from bot.handlers.protein_calc import build_handler as protein_handler
@@ -154,6 +154,7 @@ def build_app() -> Application:
     app.add_handler(CommandHandler("removemember", cmd_removemember))
     app.add_handler(CommandHandler("members", cmd_members))
     app.add_handler(CommandHandler("stats", cmd_stats))
+    app.add_handler(CommandHandler("signal", cmd_signal))
 
     # ── ConversationHandlers (before generic CallbackQueryHandlers) ────────
     # 创业财富

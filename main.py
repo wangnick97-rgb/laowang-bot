@@ -27,7 +27,7 @@ from bot.handlers.sales_assist import build_handler as sales_handler
 from bot.handlers.property_diag import build_handler as property_handler
 from bot.handlers.landlord_msg import build_handler as landlord_handler
 from bot.handlers.daily_poll import cmd_vote, callback_vote
-from bot.handlers.wealth_static import show_portfolio, show_strategy, show_us_stock_guide, cmd_signal
+from bot.handlers.wealth_static import show_portfolio, show_strategy, show_us_stock_guide, cmd_signal, show_autotrading
 
 # ── 个人健康 handlers ────────────────────────────────────────────────────────
 from bot.handlers.protein_calc import build_handler as protein_handler
@@ -202,6 +202,7 @@ def build_app() -> Application:
     app.add_handler(CallbackQueryHandler(show_portfolio, pattern="^feature_wang_portfolio$"))
     app.add_handler(CallbackQueryHandler(show_strategy, pattern="^feature_wang_strategy$"))
     app.add_handler(CallbackQueryHandler(show_us_stock_guide, pattern="^feature_us_stock_guide$"))
+    app.add_handler(CallbackQueryHandler(show_autotrading, pattern="^feature_autotrading$"))
     app.add_handler(CallbackQueryHandler(cmd_vote, pattern="^feature_vote$"))
 
     # ── 个人健康 callbacks ───────────────────────────────────────────────────

@@ -69,6 +69,7 @@ REWARDS_VIP = [
     {"id": "cash_500", "name": "💵 现金$500", "cost": 50000, "desc": "直接提现到支付宝/微信", "tier": "vip"},
     # 顶级（6-12个月+）
     {"id": "meet_vip", "name": "🤝 老王私人半日游", "cost": 8000, "desc": "老王带你逛+深度交流半天", "tier": "vip"},
+    {"id": "autotrading_1", "name": "🤖 自动交易脚本(敬请期待)", "cost": 30000, "desc": "老王自研Day Trading系统使用权", "tier": "vip"},
     {"id": "mentorship_1m", "name": "🧠 老王1个月导师计划", "cost": 60000, "desc": "每周1次30min通话+微信随时答疑", "tier": "vip"},
     {"id": "macpro_1", "name": "💻 MacBook Pro M5 Pro", "cost": 80000, "desc": "顶配生产力笔记本 (包邮)", "tier": "vip"},
 ]

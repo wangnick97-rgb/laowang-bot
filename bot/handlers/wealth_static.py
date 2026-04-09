@@ -222,6 +222,34 @@ async def show_us_stock_guide(update: Update, context: ContextTypes.DEFAULT_TYPE
     await reply(_US_STOCK_TEXT, parse_mode="Markdown", reply_markup=_INVEST_BACK)
 
 
+# ── 自动交易脚本（敬请期待）────────────────────────────────────────────────────
+
+async def show_autotrading(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if query:
+        await query.answer()
+    reply = query.message.reply_text if query else update.message.reply_text
+    await reply(
+        "🤖 *老王自动交易脚本*\n\n"
+        "老王自研的美股Day Trading自动化系统，正在内测中。\n\n"
+        "━━━━━━━━━━━━━━━━━━━━\n\n"
+        "📌 *功能预告:*\n"
+        "• 自动识别日内交易信号\n"
+        "• 实时监控+自动执行\n"
+        "• 风控系统内置\n"
+        "• 回测数据公开透明\n\n"
+        "💰 *获取方式:*\n"
+        "• 单独购买（价格待定）\n"
+        "• 👑 私董会积分兑换\n\n"
+        "🔔 *上线后第一时间通知所有会员*\n\n"
+        "⚡ 老王说：好的交易系统不会让你暴富，但会让你不暴亏。",
+        parse_mode="Markdown",
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("← 返回投资工具", callback_data="menu_invest")],
+        ]),
+    )
+
+
 # ── Admin: 发布交易信号 ──────────────────────────────────────────────────────
 
 async def cmd_signal(update: Update, context: ContextTypes.DEFAULT_TYPE):

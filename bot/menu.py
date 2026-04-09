@@ -94,6 +94,7 @@ def build_invest_menu() -> InlineKeyboardMarkup:
         [InlineKeyboardButton("💡 老王持仓", callback_data="feature_wang_portfolio"),
          InlineKeyboardButton("📋 投资策略", callback_data="feature_wang_strategy")],
         [InlineKeyboardButton("🏦 美股开户教程", callback_data="feature_us_stock_guide")],
+        [InlineKeyboardButton("🤖 自动交易脚本 (敬请期待)", callback_data="feature_autotrading")],
         [InlineKeyboardButton("← 返回创业财富", callback_data="menu_wealth")],
     ]
     return InlineKeyboardMarkup(keyboard)

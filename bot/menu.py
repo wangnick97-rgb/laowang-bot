@@ -36,6 +36,7 @@ WELCOME_NON_MEMBER = """👋 *你好！我是老王工具箱。*
 def build_join_menu() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("💰 开通会员", callback_data="join_member")],
+        [InlineKeyboardButton("🔑 我有激活码", callback_data="feature_activate")],
     ])
 
 

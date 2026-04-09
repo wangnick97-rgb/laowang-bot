@@ -67,6 +67,7 @@ from bot.handlers.referral import cmd_invite
 from bot.handlers.join import callback_join
 from bot.handlers.admin import cmd_addmember, cmd_removemember, cmd_members, cmd_stats
 from bot.handlers.member_center import show_streaks, show_membership_info, callback_invite_redirect
+from bot.handlers.activation import cmd_gencode, cmd_activate, cmd_codes
 
 logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -96,6 +97,7 @@ BOT_COMMANDS = [
     BotCommand("checkin", "✅ 每日签到"),
     BotCommand("points", "🪙 我的积分"),
     BotCommand("invite", "🎁 邀请好友"),
+    BotCommand("activate", "🔑 激活会员"),
     BotCommand("cancel", "取消当前操作"),
     BotCommand("help", "使用说明"),
 ]
@@ -141,6 +143,11 @@ def build_app() -> Application:
     app.add_handler(CommandHandler("points", cmd_points))
     app.add_handler(CommandHandler("vote", cmd_vote))
     app.add_handler(CommandHandler("badges", lambda u, c: show_badges(u, c)))
+
+    # ── Activation codes ─────────────────────────────────────────────────────
+    app.add_handler(CommandHandler("activate", cmd_activate))
+    app.add_handler(CommandHandler("gencode", cmd_gencode))
+    app.add_handler(CommandHandler("codes", cmd_codes))
 
     # ── Admin commands ───────────────────────────────────────────────────────
     app.add_handler(CommandHandler("addmember", cmd_addmember))
@@ -221,6 +228,9 @@ def build_app() -> Application:
     app.add_handler(CallbackQueryHandler(show_membership_info, pattern="^feature_membership_info$"))
     app.add_handler(CallbackQueryHandler(callback_invite_redirect, pattern="^feature_invite$"))
     app.add_handler(CallbackQueryHandler(cmd_points, pattern="^feature_points$"))
+    app.add_handler(CallbackQueryHandler(
+        lambda u, c: cmd_activate(u, c), pattern="^feature_activate$"
+    ))
 
     # ── Command shortcuts ────────────────────────────────────────────────────
     app.add_handler(CommandHandler("challenge", show_challenges))

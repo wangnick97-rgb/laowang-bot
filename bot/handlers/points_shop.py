@@ -32,6 +32,7 @@ REWARDS_FREE = [
     {"id": "keyboard_1", "name": "⌨️ 洛斐机械键盘", "cost": 2500, "desc": "复古圆键帽蓝牙键盘 (包邮)", "tier": "free"},
     {"id": "lamp_1", "name": "💡 明基ScreenBar屏幕灯", "cost": 3000, "desc": "护眼办公神器 (包邮)", "tier": "free"},
     {"id": "kindle_1", "name": "📖 Kindle Paperwhite", "cost": 5000, "desc": "电纸书阅读器 (包邮)", "tier": "free"},
+    {"id": "meet_free", "name": "🤝 老王线下见面(咖啡)", "cost": 8000, "desc": "和老王喝杯咖啡30min", "tier": "free"},
 ]
 
 # ── 会员专区 — 高端数码+服务 ────────────────────────────────────────────────
@@ -51,6 +52,7 @@ REWARDS_MEMBER = [
     {"id": "iphone_1", "name": "📱 iPhone 16 Pro", "cost": 20000, "desc": "旗舰手机 (包邮)", "tier": "member"},
     {"id": "macbook_1", "name": "💻 MacBook Air M5", "cost": 30000, "desc": "轻薄生产力笔记本 (包邮)", "tier": "member"},
     {"id": "sony_1", "name": "🎧 Sony WH-1000XM5", "cost": 6000, "desc": "旗舰头戴降噪耳机 (包邮)", "tier": "member"},
+    {"id": "meet_member", "name": "🤝 老王线下见面(午餐)", "cost": 5000, "desc": "老王请你吃午餐+1h交流", "tier": "member"},
 ]
 
 # ── 私董会专区 — 顶级权益+高端体验 ──────────────────────────────────────────
@@ -66,6 +68,7 @@ REWARDS_VIP = [
     {"id": "dinner_wang", "name": "🍽️ 和老王吃饭", "cost": 30000, "desc": "老王请客+2小时深度交流", "tier": "vip"},
     {"id": "cash_500", "name": "💵 现金$500", "cost": 50000, "desc": "直接提现到支付宝/微信", "tier": "vip"},
     # 顶级（6-12个月+）
+    {"id": "meet_vip", "name": "🤝 老王私人半日游", "cost": 8000, "desc": "老王带你逛+深度交流半天", "tier": "vip"},
     {"id": "mentorship_1m", "name": "🧠 老王1个月导师计划", "cost": 60000, "desc": "每周1次30min通话+微信随时答疑", "tier": "vip"},
     {"id": "macpro_1", "name": "💻 MacBook Pro M5 Pro", "cost": 80000, "desc": "顶配生产力笔记本 (包邮)", "tier": "vip"},
 ]

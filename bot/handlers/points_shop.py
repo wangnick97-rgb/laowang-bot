@@ -15,6 +15,10 @@ REWARDS = [
     {"id": "extra_5", "name": "📱 额外 5 次/天 使用额度", "cost": 100, "desc": "当日使用上限 +5"},
     {"id": "member_7", "name": "💎 会员延期 7 天", "cost": 500, "desc": "会员有效期延长 7 天"},
     {"id": "consult_discount", "name": "🎯 咨询 9 折券", "cost": 800, "desc": "1v1 咨询享 9 折优惠"},
+    # 健康专区
+    {"id": "health_shield", "name": "❤️ 健康打卡保护卡 ×1", "cost": 80, "desc": "健康断签时保护连续天数"},
+    {"id": "ai_meal_7", "name": "🍽️ AI食谱定制(7天)", "cost": 200, "desc": "解锁7天AI专属食谱"},
+    {"id": "ai_workout_4w", "name": "🏋️ AI训练计划(4周)", "cost": 300, "desc": "解锁4周AI定制训练"},
 ]
 
 

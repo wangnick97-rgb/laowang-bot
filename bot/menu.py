@@ -46,6 +46,7 @@ def build_main_menu() -> InlineKeyboardMarkup:
          InlineKeyboardButton("✍️ 创作工具", callback_data="menu_content")],
         [InlineKeyboardButton("🏠 Airbnb 工具", callback_data="menu_airbnb"),
          InlineKeyboardButton("🧠 个人成长", callback_data="menu_growth")],
+        [InlineKeyboardButton("💪 健康执行系统", callback_data="menu_health")],
         [InlineKeyboardButton("📰 今日简报（立即获取）", callback_data="feature_news")],
         [InlineKeyboardButton("🎯 老王 1v1 私人咨询", callback_data="feature_consult")],
     ]
@@ -90,11 +91,33 @@ def build_growth_menu() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(keyboard)
 
 
+def build_health_menu() -> InlineKeyboardMarkup:
+    keyboard = [
+        [InlineKeyboardButton("🏋️ 今日训练", callback_data="feature_workout"),
+         InlineKeyboardButton("🍽️ 今日食谱", callback_data="feature_meal")],
+        [InlineKeyboardButton("🧮 蛋白质计算", callback_data="feature_protein"),
+         InlineKeyboardButton("🔥 卡路里计算", callback_data="feature_calories")],
+        [InlineKeyboardButton("💪 老王计划库", callback_data="feature_wangplan"),
+         InlineKeyboardButton("🍫 零食白名单", callback_data="feature_snacks")],
+        [InlineKeyboardButton("💊 老王补给", callback_data="feature_supplements"),
+         InlineKeyboardButton("🥗 记录饮食", callback_data="feature_cal_log")],
+        [InlineKeyboardButton("❤️ 健康打卡", callback_data="feature_health_checkin"),
+         InlineKeyboardButton("🏃 健身打卡", callback_data="feature_gym_log")],
+        [InlineKeyboardButton("🎯 挑战任务", callback_data="feature_challenge"),
+         InlineKeyboardButton("👥 战队", callback_data="feature_team")],
+        [InlineKeyboardButton("📊 排行榜", callback_data="feature_health_rank"),
+         InlineKeyboardButton("📋 成绩单", callback_data="feature_report")],
+        [InlineKeyboardButton("← 返回主菜单", callback_data="menu_main")],
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
 MENU_MAP = {
     "menu_invest": ("📊 *投资工具*\n选择你需要的功能：", build_invest_menu),
     "menu_content": ("✍️ *创作工具*\n选择你需要的功能：", build_content_menu),
     "menu_airbnb": ("🏠 *Airbnb 工具*\n选择你需要的功能：", build_airbnb_menu),
     "menu_growth": ("🧠 *个人成长*\n选择你需要的功能：", build_growth_menu),
+    "menu_health": ("💪 *老王健康执行系统*\n\n纪律就是自由。选择你需要的功能：", build_health_menu),
 }
 
 

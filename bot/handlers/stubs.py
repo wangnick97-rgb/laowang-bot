@@ -57,3 +57,28 @@ async def stub_checkin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     await query.edit_message_text(COMING_SOON, parse_mode="Markdown", reply_markup=_BACK)
+
+
+# ── 健康板块 Phase 2 Stubs ──────────────────────────────────────────────────
+
+_HEALTH_BACK = InlineKeyboardMarkup([[InlineKeyboardButton("← 返回健康菜单", callback_data="menu_health")]])
+
+HEALTH_SOON = "🚧 *即将上线*\n\n这个健康功能正在开发中，敬请期待！"
+
+
+async def stub_workout(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    await query.message.reply_text(HEALTH_SOON, parse_mode="Markdown", reply_markup=_HEALTH_BACK)
+
+
+async def stub_meal(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    await query.message.reply_text(HEALTH_SOON, parse_mode="Markdown", reply_markup=_HEALTH_BACK)
+
+
+async def stub_wangplan(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    await query.message.reply_text(HEALTH_SOON, parse_mode="Markdown", reply_markup=_HEALTH_BACK)

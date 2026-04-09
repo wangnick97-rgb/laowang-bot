@@ -35,6 +35,19 @@ from bot.handlers.join import callback_join
 from bot.handlers.referral import cmd_invite
 from bot.handlers.consultation import build_handler as consult_handler
 from bot.handlers.points_shop import cmd_points, callback_redeem
+from bot.handlers.protein_calc import build_handler as protein_handler
+from bot.handlers.calorie_calc import build_handler as calorie_handler
+from bot.handlers.wang_snacks import show_snacks
+from bot.handlers.wang_supplements import show_supplements
+from bot.handlers.gym_checkin import build_handler as gym_handler
+from bot.handlers.health_checkin import build_handler as health_checkin_handler, show_health_rank
+from bot.handlers.workout_plan import build_handler as workout_handler
+from bot.handlers.meal_plan import build_handler as meal_handler
+from bot.handlers.calorie_log import build_handler as calorie_log_handler
+from bot.handlers.wang_plans import show_plan_menu, show_plan_detail
+from bot.handlers.challenges import show_challenges, callback_join_challenge
+from bot.handlers.team import build_handler as team_handler, show_team, show_team_rank
+from bot.handlers.health_report import show_report, send_share_text
 from services.scheduler import setup_scheduler
 
 logging.basicConfig(
@@ -60,6 +73,16 @@ BOT_COMMANDS = [
     BotCommand("badges", "🎖️ 我的成就"),
     BotCommand("consult", "🎯 1v1 私人咨询"),
     BotCommand("invite", "🎁 邀请好友"),
+    BotCommand("workout", "🏋️ 今日训练计划"),
+    BotCommand("meal", "🍽️ 今日食谱"),
+    BotCommand("callog", "🥗 记录饮食"),
+    BotCommand("protein", "🧮 蛋白质计算"),
+    BotCommand("calories", "🔥 卡路里计算"),
+    BotCommand("gym", "🏃 健身打卡"),
+    BotCommand("health", "❤️ 健康打卡"),
+    BotCommand("challenge", "🎯 挑战任务"),
+    BotCommand("team", "👥 我的战队"),
+    BotCommand("report", "📋 健康成绩单"),
     BotCommand("cancel", "取消当前操作"),
     BotCommand("help", "使用说明"),
 ]
@@ -109,6 +132,14 @@ def build_app() -> Application:
     app.add_handler(landlord_handler())
     app.add_handler(checkin_handler())
     app.add_handler(consult_handler())
+    app.add_handler(protein_handler())
+    app.add_handler(calorie_handler())
+    app.add_handler(gym_handler())
+    app.add_handler(health_checkin_handler())
+    app.add_handler(workout_handler())
+    app.add_handler(meal_handler())
+    app.add_handler(calorie_log_handler())
+    app.add_handler(team_handler())
 
     # ── Menu navigation (sub-menu callbacks) ─────────────────────────────────
     app.add_handler(CallbackQueryHandler(
@@ -125,6 +156,28 @@ def build_app() -> Application:
     app.add_handler(CallbackQueryHandler(callback_redeem, pattern="^redeem_"))
     app.add_handler(CallbackQueryHandler(show_badges, pattern="^my_badges$"))
     app.add_handler(CallbackQueryHandler(callback_vote, pattern="^vote_\\d+$"))
+
+    # ── Health module callbacks ──────────────────────────────────────────────
+    app.add_handler(CallbackQueryHandler(show_snacks, pattern="^feature_snacks$"))
+    app.add_handler(CallbackQueryHandler(show_supplements, pattern="^feature_supplements$"))
+    app.add_handler(CallbackQueryHandler(show_health_rank, pattern="^feature_health_rank$"))
+
+    # ── Health Phase 2 callbacks ────────────────────────────────────────────
+    app.add_handler(CallbackQueryHandler(show_plan_menu, pattern="^feature_wangplan$"))
+    app.add_handler(CallbackQueryHandler(show_plan_detail, pattern="^wplan_"))
+
+    # ── Health Phase 3 callbacks ────────────────────────────────────────────
+    app.add_handler(CallbackQueryHandler(show_challenges, pattern="^feature_challenge$"))
+    app.add_handler(CallbackQueryHandler(callback_join_challenge, pattern="^join_challenge_"))
+    app.add_handler(CallbackQueryHandler(show_team, pattern="^feature_team$"))
+    app.add_handler(CallbackQueryHandler(show_team_rank, pattern="^team_rank$"))
+    app.add_handler(CallbackQueryHandler(show_report, pattern="^feature_report$"))
+    app.add_handler(CallbackQueryHandler(send_share_text, pattern="^copy_report$"))
+
+    # ── Command shortcuts for Phase 3 ──────────────────────────────────────
+    app.add_handler(CommandHandler("challenge", show_challenges))
+    app.add_handler(CommandHandler("team", show_team))
+    app.add_handler(CommandHandler("report", show_report))
 
     return app
 

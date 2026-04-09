@@ -7,178 +7,187 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root {
-  --bg: var(--tg-theme-bg-color, #0a0a0f);
-  --text: var(--tg-theme-text-color, #e8e8ed);
-  --hint: var(--tg-theme-hint-color, #6e6e80);
-  --link: var(--tg-theme-link-color, #7c6aef);
-  --btn: var(--tg-theme-button-color, #7c6aef);
+  --bg: var(--tg-theme-bg-color, #09090b);
+  --text: var(--tg-theme-text-color, #fafafa);
+  --hint: var(--tg-theme-hint-color, #71717a);
+  --link: var(--tg-theme-link-color, #a78bfa);
+  --btn: var(--tg-theme-button-color, #7c3aed);
   --btn-text: var(--tg-theme-button-text-color, #fff);
-  --card: var(--tg-theme-secondary-bg-color, #131320);
-  --gold: #f5c842;
-  --silver: #a8b4c2;
-  --diamond: #7c6aef;
-  --crown: #f5a623;
-  --success: #34c759;
-  --danger: #ff453a;
+  --card: var(--tg-theme-secondary-bg-color, #18181b);
+  --border: rgba(255,255,255,0.06);
+  --gold: #fbbf24;
+  --emerald: #34d399;
+  --purple: #a78bfa;
+  --rose: #fb7185;
+  --sky: #38bdf8;
 }
-* { margin:0; padding:0; box-sizing:border-box; }
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
-  background: var(--bg); color: var(--text);
-  padding: 0 0 100px 0;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* Header */
-.header {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  padding: 24px 20px 20px;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-.header::before {
-  content: ''; position: absolute; top: -50%; left: -50%;
-  width: 200%; height: 200%;
-  background: radial-gradient(circle, rgba(124,106,239,0.08) 0%, transparent 60%);
-}
-.header .points {
-  font-size: 42px; font-weight: 800;
-  background: linear-gradient(135deg, var(--gold), #ffd700, var(--gold));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  position: relative;
-}
-.header .points-label { font-size: 13px; color: var(--hint); margin-top: 2px; }
-.header .tier-badge {
-  display: inline-block; margin-top: 10px; padding: 4px 14px;
-  border-radius: 20px; font-size: 12px; font-weight: 600;
-  letter-spacing: 0.5px;
-}
-.tier-free { background: rgba(255,255,255,0.08); color: var(--hint); }
-.tier-member { background: rgba(124,106,239,0.2); color: var(--diamond); border: 1px solid rgba(124,106,239,0.3); }
-.tier-vip { background: rgba(245,166,35,0.15); color: var(--crown); border: 1px solid rgba(245,166,35,0.3); }
-
-/* Section */
-.section { padding: 16px 16px 0; }
-.section-title {
-  font-size: 15px; font-weight: 700; margin-bottom: 12px;
-  display: flex; align-items: center; gap: 6px;
-}
-.section-title .line {
-  flex: 1; height: 1px;
-  background: linear-gradient(90deg, rgba(255,255,255,0.1), transparent);
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,sans-serif;
+  background:var(--bg);color:var(--text);
+  padding:0 0 100px;
+  -webkit-font-smoothing:antialiased;
 }
 
-/* Item cards */
-.items { display: flex; flex-direction: column; gap: 10px; }
-.item {
-  background: var(--card);
-  border-radius: 14px;
-  padding: 14px 16px;
-  display: flex; align-items: center; gap: 14px;
-  transition: transform 0.15s, box-shadow 0.15s;
-  cursor: pointer;
-  border: 1px solid rgba(255,255,255,0.04);
+/* ── Header ── */
+.hero{
+  position:relative;padding:32px 20px 24px;text-align:center;
+  background:linear-gradient(160deg,#1e1b4b 0%,#312e81 40%,#4c1d95 100%);
+  overflow:hidden;
 }
-.item:active { transform: scale(0.98); }
-.item.affordable { border-color: rgba(124,106,239,0.2); }
-.item .icon {
-  width: 44px; height: 44px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 22px; flex-shrink: 0;
-  background: rgba(255,255,255,0.05);
+.hero::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 0%,rgba(167,139,250,0.15),transparent 70%);
 }
-.item .info { flex: 1; min-width: 0; }
-.item .name { font-size: 14px; font-weight: 600; }
-.item .desc { font-size: 11px; color: var(--hint); margin-top: 2px; }
-.item .price-tag {
-  font-size: 13px; font-weight: 700; color: var(--gold);
-  white-space: nowrap; flex-shrink: 0;
+.hero *{position:relative;z-index:1}
+.hero .pts{
+  font-size:48px;font-weight:800;letter-spacing:-1px;
+  background:linear-gradient(135deg,#fbbf24,#f59e0b,#fbbf24);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
-.item.affordable .price-tag { color: var(--success); }
-.item .price-tag .unit { font-size: 10px; font-weight: 400; color: var(--hint); }
+.hero .pts-label{font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px;letter-spacing:1px;text-transform:uppercase}
+.tier-pill{
+  display:inline-flex;align-items:center;gap:4px;margin-top:12px;
+  padding:6px 16px;border-radius:100px;font-size:12px;font-weight:600;
+  backdrop-filter:blur(8px);
+}
+.tier-free{background:rgba(255,255,255,0.08);color:var(--hint)}
+.tier-member{background:rgba(124,58,237,0.25);color:#c4b5fd;border:1px solid rgba(124,58,237,0.4)}
+.tier-vip{background:rgba(251,191,36,0.15);color:#fcd34d;border:1px solid rgba(251,191,36,0.3)}
 
-/* Locked section */
-.locked-banner {
-  background: linear-gradient(135deg, rgba(124,106,239,0.08), rgba(245,166,35,0.05));
-  border: 1px dashed rgba(255,255,255,0.1);
-  border-radius: 14px; padding: 16px; text-align: center;
-  margin: 8px 16px 16px;
+/* ── Section ── */
+.section{padding:20px 16px 0}
+.section-head{
+  display:flex;align-items:center;gap:8px;margin-bottom:14px;
 }
-.locked-banner .lock-icon { font-size: 28px; margin-bottom: 6px; }
-.locked-banner .lock-text { font-size: 13px; color: var(--hint); line-height: 1.5; }
-.locked-banner .upgrade-btn {
-  display: inline-block; margin-top: 10px; padding: 8px 24px;
-  background: var(--btn); color: var(--btn-text); border: none;
-  border-radius: 20px; font-size: 13px; font-weight: 600;
-  cursor: pointer;
+.section-title{font-size:16px;font-weight:700;white-space:nowrap}
+.section-line{flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
+
+/* ── Product Grid ── */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.product{
+  background:var(--card);border-radius:16px;padding:14px;
+  display:flex;flex-direction:column;align-items:center;
+  border:1px solid var(--border);
+  transition:transform 0.15s,border-color 0.15s;
+  cursor:pointer;position:relative;overflow:hidden;
+}
+.product:active{transform:scale(0.97)}
+.product.can-buy{border-color:rgba(124,58,237,0.3)}
+.product.can-buy::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(124,58,237,0.06),transparent);
+}
+.product .img-wrap{
+  width:64px;height:64px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:32px;margin-bottom:8px;position:relative;
+}
+/* 不同类型的背景渐变 */
+.img-wrap.digital{background:linear-gradient(135deg,#1e1b4b,#312e81)}
+.img-wrap.physical{background:linear-gradient(135deg,#1c1917,#292524)}
+.img-wrap.service{background:linear-gradient(135deg,#064e3b,#065f46)}
+.img-wrap.premium{background:linear-gradient(135deg,#451a03,#78350f)}
+.img-wrap.cash{background:linear-gradient(135deg,#14532d,#166534)}
+.img-wrap.ai{background:linear-gradient(135deg,#172554,#1e3a5f)}
+
+.product .name{
+  font-size:12px;font-weight:600;text-align:center;
+  line-height:1.3;min-height:32px;
+  display:flex;align-items:center;
+}
+.product .price{
+  margin-top:6px;font-size:13px;font-weight:800;
+  color:var(--gold);
+}
+.product .price .u{font-size:10px;font-weight:400;color:var(--hint)}
+.product.can-buy .price{color:var(--emerald)}
+
+/* Full width item (for expensive/featured) */
+.grid .featured{grid-column:1/-1;flex-direction:row;gap:14px;padding:16px}
+.featured .img-wrap{width:56px;height:56px;font-size:28px;margin-bottom:0;flex-shrink:0}
+.featured .info{flex:1;text-align:left}
+.featured .name{min-height:auto;font-size:13px}
+.featured .desc{font-size:11px;color:var(--hint);margin-top:2px}
+.featured .price{margin-top:4px}
+
+/* ── Locked Banner ── */
+.locked{
+  margin:12px 16px;padding:20px;border-radius:16px;text-align:center;
+  background:linear-gradient(135deg,rgba(124,58,237,0.06),rgba(251,191,36,0.04));
+  border:1px dashed rgba(255,255,255,0.08);
+}
+.locked .icon{font-size:32px;margin-bottom:8px}
+.locked .msg{font-size:13px;color:var(--hint);line-height:1.5}
+.locked .btn-up{
+  display:inline-block;margin-top:12px;padding:10px 28px;
+  background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;
+  border:none;border-radius:100px;font-size:13px;font-weight:600;
+  cursor:pointer;
 }
 
-/* Redeem modal */
-.modal-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.6); z-index: 100;
-  align-items: flex-end; justify-content: center;
-  backdrop-filter: blur(4px);
+/* ── Modal ── */
+.overlay{
+  display:none;position:fixed;inset:0;z-index:100;
+  background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);
+  align-items:flex-end;justify-content:center;
 }
-.modal-overlay.show { display: flex; }
-.modal {
-  background: var(--card); border-radius: 20px 20px 0 0;
-  padding: 24px 20px 40px; width: 100%; max-width: 500px;
-  animation: slideUp 0.25s ease-out;
+.overlay.show{display:flex}
+.modal{
+  background:var(--card);border-radius:24px 24px 0 0;
+  padding:28px 24px 40px;width:100%;max-width:500px;
+  animation:up .25s ease-out;
 }
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.modal .modal-icon { text-align: center; font-size: 48px; margin-bottom: 12px; }
-.modal .modal-title { text-align: center; font-size: 17px; font-weight: 700; }
-.modal .modal-desc { text-align: center; font-size: 13px; color: var(--hint); margin-top: 4px; }
-.modal .modal-cost {
-  text-align: center; font-size: 24px; font-weight: 800;
-  color: var(--gold); margin: 16px 0;
+@keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal .m-img{text-align:center;font-size:56px;margin-bottom:12px}
+.modal .m-name{text-align:center;font-size:18px;font-weight:700}
+.modal .m-desc{text-align:center;font-size:13px;color:var(--hint);margin-top:4px}
+.modal .m-cost{
+  text-align:center;font-size:28px;font-weight:800;
+  color:var(--gold);margin:18px 0;
 }
-.modal .modal-btns { display: flex; gap: 10px; margin-top: 16px; }
-.modal .btn {
-  flex: 1; padding: 14px; border: none; border-radius: 12px;
-  font-size: 15px; font-weight: 600; cursor: pointer;
+.modal .m-balance{text-align:center;font-size:12px;color:var(--hint);margin-bottom:16px}
+.modal .btns{display:flex;gap:10px}
+.modal .b{
+  flex:1;padding:15px;border:none;border-radius:14px;
+  font-size:15px;font-weight:600;cursor:pointer;
 }
-.modal .btn-cancel { background: rgba(255,255,255,0.08); color: var(--text); }
-.modal .btn-confirm { background: var(--btn); color: var(--btn-text); }
-.modal .btn-confirm:disabled { opacity: 0.4; }
+.modal .b-no{background:rgba(255,255,255,0.06);color:var(--text)}
+.modal .b-yes{background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff}
+.modal .b-yes:disabled{opacity:0.3}
 
-/* Toast */
-.toast {
-  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-  background: var(--success); color: #fff; padding: 10px 24px;
-  border-radius: 20px; font-size: 14px; font-weight: 600;
-  z-index: 200; display: none;
-  box-shadow: 0 4px 20px rgba(52,199,89,0.3);
+/* ── Toast ── */
+.toast{
+  position:fixed;top:20px;left:50%;transform:translateX(-50%);
+  background:var(--emerald);color:#000;padding:12px 28px;
+  border-radius:100px;font-size:14px;font-weight:700;
+  z-index:200;display:none;
+  box-shadow:0 8px 30px rgba(52,211,153,0.3);
 }
-.toast.show { display: block; animation: fadeIn 0.2s ease-out; }
-@keyframes fadeIn { from { opacity: 0; transform: translate(-50%, -10px); } to { opacity: 1; transform: translate(-50%, 0); } }
-
-.loading { text-align: center; padding: 40px; color: var(--hint); font-size: 14px; }
+.toast.show{display:block;animation:fadeIn .2s ease-out}
+@keyframes fadeIn{from{opacity:0;transform:translate(-50%,-10px)}to{opacity:1;transform:translate(-50%,0)}}
 </style>
 </head>
 <body>
 
-<div class="header" id="header">
-  <div class="points" id="pts">--</div>
-  <div class="points-label">可用积分</div>
-  <div class="tier-badge tier-free" id="tier-badge">加载中</div>
+<div class="hero">
+  <div class="pts" id="pts">--</div>
+  <div class="pts-label">可用积分</div>
+  <div class="tier-pill tier-free" id="tier">加载中</div>
 </div>
 
-<div id="shop-content">
-  <div class="loading">加载商城中...</div>
-</div>
+<div id="content"><div style="text-align:center;padding:40px;color:var(--hint)">加载商城中...</div></div>
 
-<div class="modal-overlay" id="modal">
+<div class="overlay" id="modal">
   <div class="modal">
-    <div class="modal-icon" id="m-icon">🎁</div>
-    <div class="modal-title" id="m-title">--</div>
-    <div class="modal-desc" id="m-desc">--</div>
-    <div class="modal-cost" id="m-cost">-- 积分</div>
-    <div class="modal-btns">
-      <button class="btn btn-cancel" onclick="closeModal()">取消</button>
-      <button class="btn btn-confirm" id="m-btn" onclick="doRedeem()">确认兑换</button>
+    <div class="m-img" id="mi">🎁</div>
+    <div class="m-name" id="mn">--</div>
+    <div class="m-desc" id="md">--</div>
+    <div class="m-cost" id="mc">-- 积分</div>
+    <div class="m-balance" id="mb">余额: --</div>
+    <div class="btns">
+      <button class="b b-no" onclick="closeM()">取消</button>
+      <button class="b b-yes" id="mbtn" onclick="redeem()">确认兑换</button>
     </div>
   </div>
 </div>
@@ -186,147 +195,104 @@ body {
 <div class="toast" id="toast">✅ 兑换成功!</div>
 
 <script>
-const tg = window.Telegram.WebApp;
-tg.ready();
-tg.expand();
+const tg=window.Telegram.WebApp;tg.ready();tg.expand();
+const H={'Authorization':'tma '+tg.initData,'Content-Type':'application/json'};
+let pts=0,sel=null;
 
-const initData = tg.initData;
-const headers = {
-  'Authorization': 'tma ' + initData,
-  'Content-Type': 'application/json'
+// 商品图标背景分类
+const bgMap={
+  shield_1:'service',health_shield:'service',extra_5:'service',
+  wallpaper_1:'digital',checklist_1:'digital',book_1:'digital',template_1:'digital',notion_1:'digital',member_7:'service',
+  band_1:'physical',earphone_1:'physical',keyboard_1:'physical',lamp_1:'physical',kindle_1:'physical',
+  member_30:'service',consult_discount:'service',consult_15:'service',
+  charger_1:'physical',mouse_1:'physical',speaker_1:'physical',
+  airpods_1:'physical',watch_1:'physical',ipad_1:'physical',iphone_1:'physical',macbook_1:'physical',sony_1:'physical',
+  vip_extend_30:'service',claude_3m:'ai',chatgpt_3m:'ai',cursor_3m:'ai',
+  cash_100:'cash',cash_500:'cash',offline_meet:'premium',dinner_wang:'premium',
+  mentorship_1m:'premium',macpro_1:'physical'
 };
 
-let userPoints = 0;
-let selectedReward = null;
+function em(n){const m=n.match(/^(\S+)\s/);return m?m[1]:'🎁'}
+function cn(n){return n.replace(/^\S+\s/,'')}
 
-// Emoji from reward name
-function getEmoji(name) {
-  const match = name.match(/^(\S+)\s/);
-  return match ? match[1] : '🎁';
-}
+// 高价商品用featured样式（全宽）
+const featuredIds=new Set(['macbook_1','iphone_1','macpro_1','mentorship_1m','dinner_wang','cash_500']);
 
-async function loadShop() {
-  try {
-    const r = await fetch('/api/shop', { headers });
-    const d = await r.json();
-    userPoints = d.points;
+async function load(){
+  try{
+    const r=await fetch('/api/shop',{headers:H});
+    const d=await r.json();
+    pts=d.points;
+    document.getElementById('pts').textContent=pts.toLocaleString();
+    const tn={free:'🆓 免费用户',member:'💎 会员',vip:'👑 私董会',admin:'⚡ 管理员'};
+    const tc={free:'tier-free',member:'tier-member',vip:'tier-vip',admin:'tier-vip'};
+    const t=document.getElementById('tier');
+    t.textContent=tn[d.tier]||'免费';
+    t.className='tier-pill '+(tc[d.tier]||'tier-free');
 
-    document.getElementById('pts').textContent = d.points.toLocaleString();
-
-    const tierNames = { free: '🆓 免费用户', member: '💎 会员', vip: '👑 私董会', admin: '⚡ 管理员' };
-    const tierClasses = { free: 'tier-free', member: 'tier-member', vip: 'tier-vip', admin: 'tier-vip' };
-    const badge = document.getElementById('tier-badge');
-    badge.textContent = tierNames[d.tier] || '免费用户';
-    badge.className = 'tier-badge ' + (tierClasses[d.tier] || 'tier-free');
-
-    let html = '';
-    d.sections.forEach(sec => {
-      html += `<div class="section">
-        <div class="section-title">${sec.title}<div class="line"></div></div>
-        <div class="items">`;
-      sec.items.forEach(item => {
-        const afford = userPoints >= item.cost;
-        const emoji = getEmoji(item.name);
-        const nameClean = item.name.replace(/^\S+\s/, '');
-        html += `<div class="item ${afford ? 'affordable' : ''}"
-          onclick="openModal('${item.id}','${emoji}','${nameClean.replace(/'/g,"\\'")}','${item.desc.replace(/'/g,"\\'")}',${item.cost})">
-          <div class="icon">${emoji}</div>
-          <div class="info">
-            <div class="name">${nameClean}</div>
-            <div class="desc">${item.desc}</div>
-          </div>
-          <div class="price-tag">${item.cost.toLocaleString()} <span class="unit">分</span></div>
-        </div>`;
+    let h='';
+    d.sections.forEach(sec=>{
+      h+=`<div class="section"><div class="section-head"><div class="section-title">${sec.title}</div><div class="section-line"></div></div><div class="grid">`;
+      sec.items.forEach(it=>{
+        const e=em(it.name),name=cn(it.name),ok=pts>=it.cost;
+        const bg=bgMap[it.id]||'digital';
+        const feat=featuredIds.has(it.id);
+        if(feat){
+          h+=`<div class="product featured ${ok?'can-buy':''}" onclick="open_m('${it.id}','${e}','${name.replace(/'/g,"\\'")}','${it.desc.replace(/'/g,"\\'")}',${it.cost})">
+            <div class="img-wrap ${bg}">${e}</div>
+            <div class="info"><div class="name">${name}</div><div class="desc">${it.desc}</div>
+            <div class="price">${it.cost.toLocaleString()} <span class="u">积分</span></div></div></div>`;
+        }else{
+          h+=`<div class="product ${ok?'can-buy':''}" onclick="open_m('${it.id}','${e}','${name.replace(/'/g,"\\'")}','${it.desc.replace(/'/g,"\\'")}',${it.cost})">
+            <div class="img-wrap ${bg}">${e}</div>
+            <div class="name">${name}</div>
+            <div class="price">${it.cost.toLocaleString()} <span class="u">积分</span></div></div>`;
+        }
       });
-      html += '</div></div>';
+      h+='</div></div>';
     });
 
-    // Locked sections hint
-    if (d.tier === 'free') {
-      html += `<div class="locked-banner">
-        <div class="lock-icon">🔒</div>
-        <div class="lock-text">开通会员解锁 MacBook / iPhone 等高端奖品<br>升级私董会解锁 现金提现 / 老王线下交流</div>
-        <button class="upgrade-btn" onclick="tg.close()">了解会员权益</button>
-      </div>`;
-    } else if (d.tier === 'member') {
-      html += `<div class="locked-banner">
-        <div class="lock-icon">👑</div>
-        <div class="lock-text">升级私董会解锁现金提现、线下交流、导师计划</div>
-        <button class="upgrade-btn" onclick="tg.close()">了解私董会</button>
-      </div>`;
+    if(d.tier==='free'){
+      h+=`<div class="locked"><div class="icon">🔒</div><div class="msg">开通会员解锁高端数码奖品<br>MacBook · iPhone · AirPods · Apple Watch</div><button class="btn-up" onclick="tg.close()">了解会员权益</button></div>`;
+    }else if(d.tier==='member'){
+      h+=`<div class="locked"><div class="icon">👑</div><div class="msg">升级私董会解锁顶级权益<br>现金提现 · 老王线下 · 导师计划</div><button class="btn-up" onclick="tg.close()">了解私董会</button></div>`;
     }
-
-    document.getElementById('shop-content').innerHTML = html;
-  } catch(e) {
-    document.getElementById('shop-content').innerHTML = '<div class="loading">加载失败，请重试</div>';
-  }
+    document.getElementById('content').innerHTML=h;
+  }catch(e){document.getElementById('content').innerHTML='<div style="text-align:center;padding:40px;color:var(--hint)">加载失败</div>'}
 }
 
-function openModal(id, emoji, name, desc, cost) {
-  selectedReward = { id, cost };
-  document.getElementById('m-icon').textContent = emoji;
-  document.getElementById('m-title').textContent = name;
-  document.getElementById('m-desc').textContent = desc;
-  document.getElementById('m-cost').textContent = cost.toLocaleString() + ' 积分';
-  const btn = document.getElementById('m-btn');
-  if (userPoints < cost) {
-    btn.disabled = true;
-    btn.textContent = '积分不足';
-  } else {
-    btn.disabled = false;
-    btn.textContent = '确认兑换';
-  }
+function open_m(id,e,n,d,c){
+  sel={id,cost:c};
+  document.getElementById('mi').textContent=e;
+  document.getElementById('mn').textContent=n;
+  document.getElementById('md').textContent=d;
+  document.getElementById('mc').textContent=c.toLocaleString()+' 积分';
+  document.getElementById('mb').textContent='当前余额: '+pts.toLocaleString()+' 积分';
+  const b=document.getElementById('mbtn');
+  if(pts<c){b.disabled=true;b.textContent='积分不足'}
+  else{b.disabled=false;b.textContent='确认兑换'}
   document.getElementById('modal').classList.add('show');
 }
+function closeM(){document.getElementById('modal').classList.remove('show');sel=null}
 
-function closeModal() {
-  document.getElementById('modal').classList.remove('show');
-  selectedReward = null;
+async function redeem(){
+  if(!sel)return;
+  const b=document.getElementById('mbtn');b.disabled=true;b.textContent='兑换中...';
+  try{
+    const r=await fetch('/api/redeem',{method:'POST',headers:H,body:JSON.stringify({id:sel.id})});
+    if(!r.ok){const e=await r.json();alert(e.detail||'失败');closeM();return}
+    const d=await r.json();pts=d.remaining_points;
+    document.getElementById('pts').textContent=pts.toLocaleString();
+    closeM();
+    const t=document.getElementById('toast');
+    t.textContent='✅ '+d.reward+' 兑换成功!';
+    t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);
+    setTimeout(load,500);
+  }catch(e){alert('网络错误');closeM()}
 }
 
-async function doRedeem() {
-  if (!selectedReward) return;
-  const btn = document.getElementById('m-btn');
-  btn.disabled = true;
-  btn.textContent = '兑换中...';
-
-  try {
-    const r = await fetch('/api/redeem', {
-      method: 'POST', headers,
-      body: JSON.stringify({ id: selectedReward.id }),
-    });
-    if (!r.ok) {
-      const err = await r.json();
-      alert(err.detail || '兑换失败');
-      closeModal();
-      return;
-    }
-    const d = await r.json();
-    userPoints = d.remaining_points;
-    document.getElementById('pts').textContent = d.remaining_points.toLocaleString();
-
-    closeModal();
-
-    // Show toast
-    const toast = document.getElementById('toast');
-    toast.textContent = '✅ ' + d.reward + ' 兑换成功!';
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2500);
-
-    // Reload shop
-    setTimeout(loadShop, 500);
-  } catch(e) {
-    alert('网络错误，请重试');
-    closeModal();
-  }
-}
-
-// Close modal on overlay click
-document.getElementById('modal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-
-loadShop();
+document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeM()});
+load();
 </script>
 </body>
 </html>

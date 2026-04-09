@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>老王工具箱</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: var(--tg-theme-bg-color, #1a1a2e);
+  --text: var(--tg-theme-text-color, #e0e0e0);
+  --hint: var(--tg-theme-hint-color, #888);
+  --link: var(--tg-theme-link-color, #64b5f6);
+  --btn: var(--tg-theme-button-color, #5865f2);
+  --btn-text: var(--tg-theme-button-text-color, #fff);
+  --card: var(--tg-theme-secondary-bg-color, #16213e);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg); color: var(--text);
+  padding: 12px; padding-bottom: 80px;
+  -webkit-font-smoothing: antialiased;
+}
+.card {
+  background: var(--card); border-radius: 12px;
+  padding: 16px; margin-bottom: 12px;
+}
+.card h2 { font-size: 15px; margin-bottom: 10px; opacity: 0.9; }
+.card h2 span { opacity: 0.5; font-weight: normal; font-size: 12px; }
+
+/* Dashboard */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat { text-align: center; padding: 10px; background: var(--bg); border-radius: 8px; }
+.stat .num { font-size: 24px; font-weight: 700; color: var(--link); }
+.stat .label { font-size: 11px; color: var(--hint); margin-top: 2px; }
+.rank-bar {
+  margin-top: 10px; padding: 8px 12px; background: var(--bg); border-radius: 8px;
+  display: flex; justify-content: space-between; align-items: center; font-size: 13px;
+}
+.rank-bar .rank { color: var(--link); font-weight: 700; font-size: 18px; }
+.member-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px;
+  font-weight: 600;
+}
+.member-badge.member { background: #5865f2; color: #fff; }
+.member-badge.free { background: #555; color: #aaa; }
+
+/* Calendar heatmap */
+.cal-legend { display: flex; gap: 8px; margin-bottom: 8px; font-size: 11px; color: var(--hint); }
+.cal-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: middle; margin-right: 2px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
+.cal-cell {
+  aspect-ratio: 1; border-radius: 3px; background: var(--bg); position: relative;
+  font-size: 9px; display: flex; align-items: center; justify-content: center; color: var(--hint);
+}
+.cal-cell.g { background: #2d6a4f; }
+.cal-cell.h { background: #e63946; }
+.cal-cell.w { background: #457b9d; }
+.cal-cell.gh { background: linear-gradient(135deg, #2d6a4f 50%, #e63946 50%); }
+.cal-cell.gw { background: linear-gradient(135deg, #2d6a4f 50%, #457b9d 50%); }
+.cal-cell.hw { background: linear-gradient(135deg, #e63946 50%, #457b9d 50%); }
+.cal-cell.ghw { background: linear-gradient(135deg, #2d6a4f 33%, #e63946 33%, #e63946 66%, #457b9d 66%); }
+.cal-cell.today { outline: 2px solid var(--link); }
+.cal-header { font-weight: 600; color: var(--hint); font-size: 10px; }
+
+/* Charts */
+.chart-container { position: relative; height: 200px; }
+
+/* Workout stats */
+.workout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.workout-stat { text-align: center; padding: 8px; background: var(--bg); border-radius: 8px; }
+.workout-stat .num { font-size: 20px; font-weight: 700; }
+.workout-stat .label { font-size: 11px; color: var(--hint); }
+
+/* Leaderboard */
+.lb-row {
+  display: flex; align-items: center; padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.lb-row:last-child { border-bottom: none; }
+.lb-rank { width: 28px; font-weight: 700; font-size: 14px; }
+.lb-name { flex: 1; font-size: 13px; }
+.lb-pts { font-size: 13px; color: var(--link); font-weight: 600; }
+.lb-streak { font-size: 11px; color: var(--hint); margin-left: 6px; }
+
+/* Badges */
+.badges-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.badge-item { text-align: center; padding: 8px; border-radius: 8px; background: var(--bg); }
+.badge-item .emoji { font-size: 24px; }
+.badge-item .name { font-size: 10px; margin-top: 4px; }
+.badge-item.locked { opacity: 0.3; }
+
+.loading { text-align: center; padding: 20px; color: var(--hint); }
+.error { color: #e63946; padding: 8px; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<!-- Dashboard -->
+<div class="card" id="dashboard">
+  <h2>📊 我的数据</h2>
+  <div class="loading">加载中...</div>
+</div>
+
+<!-- Calendar -->
+<div class="card" id="calendar-card">
+  <h2>📅 打卡日历 <span>近90天</span></h2>
+  <div class="cal-legend">
+    <span><i style="background:#2d6a4f"></i>签到</span>
+    <span><i style="background:#e63946"></i>健康</span>
+    <span><i style="background:#457b9d"></i>健身</span>
+  </div>
+  <div class="cal-grid" id="calendar"></div>
+</div>
+
+<!-- Calories Chart -->
+<div class="card">
+  <h2>🔥 卡路里趋势 <span>近30天</span></h2>
+  <div class="chart-container"><canvas id="calChart"></canvas></div>
+</div>
+
+<!-- Workout Stats -->
+<div class="card" id="workout-card">
+  <h2>🏋️ 训练统计</h2>
+  <div id="workout-stats" class="loading">加载中...</div>
+</div>
+
+<!-- Leaderboard -->
+<div class="card">
+  <h2>🏆 排行榜 TOP 10</h2>
+  <div id="leaderboard" class="loading">加载中...</div>
+</div>
+
+<!-- Badges -->
+<div class="card">
+  <h2>🎖️ 成就墙</h2>
+  <div id="badges" class="loading">加载中...</div>
+</div>
+
+<script>
+const tg = window.Telegram.WebApp;
+tg.ready();
+tg.expand();
+
+const initData = tg.initData;
+const headers = { 'Authorization': 'tma ' + initData };
+
+async function api(path) {
+  const r = await fetch('/api/' + path, { headers });
+  if (!r.ok) throw new Error(r.status);
+  return r.json();
+}
+
+// ── Dashboard ──
+async function loadDashboard() {
+  try {
+    const d = await api('me');
+    const memberClass = d.membership_status === 'free' ? 'free' : 'member';
+    const memberText = d.membership_status === 'free' ? '免费用户' : '💎 会员';
+    document.getElementById('dashboard').innerHTML = `
+      <h2>📊 我的数据 <span class="member-badge ${memberClass}">${memberText}</span></h2>
+      <div class="stats-grid">
+        <div class="stat"><div class="num">${d.points}</div><div class="label">🪙 积分</div></div>
+        <div class="stat"><div class="num">${d.checkin_streak}</div><div class="label">🔥 签到连续</div></div>
+        <div class="stat"><div class="num">${d.health_streak}</div><div class="label">❤️ 健康连续</div></div>
+        <div class="stat"><div class="num">${d.gym_count}</div><div class="label">🏋️ 累计训练</div></div>
+      </div>
+      <div class="rank-bar">
+        <span>排名</span><span class="rank">#${d.rank || '--'}</span>
+      </div>
+    `;
+  } catch(e) { document.getElementById('dashboard').innerHTML = '<div class="error">加载失败</div>'; }
+}
+
+// ── Calendar Heatmap ──
+async function loadCalendar() {
+  try {
+    const d = await api('checkins?months=3');
+    const gSet = new Set(d.general);
+    const hSet = new Set(d.health);
+    const wSet = new Set(d.gym);
+
+    const today = new Date();
+    const start = new Date(today);
+    start.setDate(start.getDate() - 89);
+    // Align to Monday
+    while (start.getDay() !== 1) start.setDate(start.getDate() - 1);
+
+    const grid = document.getElementById('calendar');
+    // Header row
+    ['一','二','三','四','五','六','日'].forEach(day => {
+      const el = document.createElement('div');
+      el.className = 'cal-cell cal-header';
+      el.textContent = day;
+      grid.appendChild(el);
+    });
+
+    const cur = new Date(start);
+    while (cur <= today || cur.getDay() !== 1) {
+      const ds = cur.toISOString().slice(0, 10);
+      const el = document.createElement('div');
+      const g = gSet.has(ds), h = hSet.has(ds), w = wSet.has(ds);
+      let cls = 'cal-cell';
+      if (g && h && w) cls += ' ghw';
+      else if (g && h) cls += ' gh';
+      else if (g && w) cls += ' gw';
+      else if (h && w) cls += ' hw';
+      else if (g) cls += ' g';
+      else if (h) cls += ' h';
+      else if (w) cls += ' w';
+      if (ds === today.toISOString().slice(0,10)) cls += ' today';
+      el.className = cls;
+      if (cur > today) el.style.opacity = '0.1';
+      grid.appendChild(el);
+      cur.setDate(cur.getDate() + 1);
+      if (cur > today && cur.getDay() === 1) break;
+    }
+  } catch(e) { document.getElementById('calendar').innerHTML = '<div class="error">加载失败</div>'; }
+}
+
+// ── Calorie Chart ──
+async function loadCalories() {
+  try {
+    const d = await api('calories?days=30');
+    if (!d.length) return;
+    new Chart(document.getElementById('calChart'), {
+      type: 'bar',
+      data: {
+        labels: d.map(r => r.date.slice(5)),
+        datasets: [{
+          label: 'kcal',
+          data: d.map(r => r.calories),
+          backgroundColor: 'rgba(100,181,246,0.6)',
+          borderRadius: 4,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 9 } }, grid: { display: false } },
+          y: { ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+        }
+      }
+    });
+  } catch(e) {}
+}
+
+// ── Workout Stats ──
+async function loadWorkouts() {
+  try {
+    const d = await api('workouts');
+    const typeNames = { push:'推', pull:'拉', legs:'腿', full:'全身', cardio:'有氧', rest:'休息', core:'核心' };
+    const typeHtml = Object.entries(d.by_type).map(([k,v]) =>
+      `<span>${typeNames[k]||k}: <b>${v}</b></span>`
+    ).join(' · ');
+
+    document.getElementById('workout-stats').innerHTML = `
+      <div class="workout-grid">
+        <div class="workout-stat"><div class="num">${d.total}</div><div class="label">总训练次数</div></div>
+        <div class="workout-stat"><div class="num">${d.this_week}</div><div class="label">本周训练</div></div>
+      </div>
+      <div style="font-size:12px;color:var(--hint)">${typeHtml || '暂无数据'}</div>
+    `;
+  } catch(e) { document.getElementById('workout-stats').innerHTML = '<div class="error">加载失败</div>'; }
+}
+
+// ── Leaderboard ──
+async function loadLeaderboard() {
+  try {
+    const d = await api('leaderboard');
+    const medals = ['🥇','🥈','🥉'];
+    document.getElementById('leaderboard').innerHTML = d.map((u,i) => `
+      <div class="lb-row">
+        <div class="lb-rank">${medals[i]||u.rank+'.'}</div>
+        <div class="lb-name">${u.name}</div>
+        <div class="lb-pts">${u.points}分</div>
+        <div class="lb-streak">🔥${u.checkin_streak}天</div>
+      </div>
+    `).join('') || '<div style="color:var(--hint);font-size:13px">暂无数据</div>';
+  } catch(e) { document.getElementById('leaderboard').innerHTML = '<div class="error">加载失败</div>'; }
+}
+
+// ── Badges ──
+async function loadBadges() {
+  try {
+    const d = await api('badges');
+    document.getElementById('badges').innerHTML = d.badges.map(b => `
+      <div class="badge-item ${b.unlocked?'':'locked'}">
+        <div class="emoji">${b.unlocked ? b.emoji : '🔒'}</div>
+        <div class="name">${b.unlocked ? b.name : '???'}</div>
+      </div>
+    `).join('');
+  } catch(e) { document.getElementById('badges').innerHTML = '<div class="error">加载失败</div>'; }
+}
+
+// ── Load all ──
+Promise.all([
+  loadDashboard(),
+  loadCalendar(),
+  loadCalories(),
+  loadWorkouts(),
+  loadLeaderboard(),
+  loadBadges(),
+]);
+</script>
+</body>
+</html>

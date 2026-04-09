@@ -16,6 +16,7 @@ WEBHOOK_URL = os.getenv("WEBHOOK_URL", "")
 PORT = int(os.getenv("PORT", "8080"))
 
 SCHEDULER_TIMEZONE = os.getenv("SCHEDULER_TIMEZONE", "Asia/Shanghai")
+WEBAPP_URL = os.getenv("WEBAPP_URL", "")
 DAILY_USAGE_LIMIT = int(os.getenv("DAILY_USAGE_LIMIT", "20"))
 
 # Claude model tiers

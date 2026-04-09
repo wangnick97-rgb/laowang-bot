@@ -2,7 +2,7 @@
 /start command and main menu InlineKeyboard builder.
 4-section architecture: 创业财富 / 个人健康 / 个人成长 / 会员中心
 """
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.ext import ContextTypes
 
 import logging
@@ -176,7 +176,17 @@ def build_execution_menu() -> InlineKeyboardMarkup:
 # ── 会员中心 ──────────────────────────────────────────────────────────────────
 
 def build_member_menu() -> InlineKeyboardMarkup:
-    keyboard = [
+    from config.settings import WEBAPP_URL
+    keyboard = []
+
+    # Mini App 数据面板按钮（仅在配置了WEBAPP_URL时显示）
+    if WEBAPP_URL:
+        keyboard.append([InlineKeyboardButton(
+            "📊 数据面板",
+            web_app=WebAppInfo(url=f"{WEBAPP_URL}/webapp/index.html"),
+        )])
+
+    keyboard.extend([
         [InlineKeyboardButton("🪙 我的积分", callback_data="feature_points"),
          InlineKeyboardButton("🔥 连续天数", callback_data="feature_streaks")],
         [InlineKeyboardButton("🎖️ 我的成就", callback_data="my_badges"),
@@ -188,7 +198,7 @@ def build_member_menu() -> InlineKeyboardMarkup:
         [InlineKeyboardButton("✅ 每日签到", callback_data="feature_checkin"),
          InlineKeyboardButton("🎯 1v1咨询", callback_data="feature_consult")],
         [InlineKeyboardButton("← 返回主菜单", callback_data="menu_main")],
-    ]
+    ])
     return InlineKeyboardMarkup(keyboard)
 
 

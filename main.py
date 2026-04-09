@@ -237,9 +237,11 @@ async def post_init(app: Application):
 
 
 def main():
+    """Standalone entry point (local dev polling mode)."""
     app = build_app()
 
     if BOT_MODE == "webhook" and WEBHOOK_URL:
+        # In production, use webapp/api.py (FastAPI + uvicorn) instead
         app.run_webhook(
             listen="0.0.0.0",
             port=PORT,

@@ -180,31 +180,25 @@ async def job_evening_reminder(bot: Bot):
 def setup_scheduler(bot: Bot) -> AsyncIOScheduler:
     scheduler = AsyncIOScheduler(timezone=SCHEDULER_TIMEZONE)
 
-    # Daily news brief — 8:30 AM ET every day
+    # ── 早间推送 ──────────────────────────────────────────────────────────────
+    # 老王早报 — 每天 7:30 北京时间
     scheduler.add_job(
         lambda: asyncio.create_task(job_daily_news_brief(bot)),
-        CronTrigger(hour=8, minute=30, timezone=SCHEDULER_TIMEZONE),
+        CronTrigger(hour=7, minute=30, timezone=SCHEDULER_TIMEZONE),
         id="daily_news_brief",
         replace_existing=True,
     )
 
-    # Pre-market intel — 9:00 AM ET weekdays
+    # 今日认知 — 每天 8:00 北京时间
     scheduler.add_job(
-        lambda: asyncio.create_task(job_premarket_intel(bot)),
-        CronTrigger(hour=9, minute=0, day_of_week="mon-fri", timezone=SCHEDULER_TIMEZONE),
-        id="premarket_intel",
+        lambda: asyncio.create_task(job_daily_cognition(bot)),
+        CronTrigger(hour=8, minute=0, timezone=SCHEDULER_TIMEZONE),
+        id="daily_cognition",
         replace_existing=True,
     )
 
-    # Post-market intel — 4:30 PM ET weekdays
-    scheduler.add_job(
-        lambda: asyncio.create_task(job_postmarket_intel(bot)),
-        CronTrigger(hour=16, minute=30, day_of_week="mon-fri", timezone=SCHEDULER_TIMEZONE),
-        id="postmarket_intel",
-        replace_existing=True,
-    )
-
-    # Membership expiry reminder — 10:00 AM ET daily
+    # ── 日间推送 ──────────────────────────────────────────────────────────────
+    # 会员到期提醒 — 每天 10:00 北京时间
     scheduler.add_job(
         lambda: asyncio.create_task(job_membership_reminder(bot)),
         CronTrigger(hour=10, minute=0, timezone=SCHEDULER_TIMEZONE),
@@ -212,15 +206,7 @@ def setup_scheduler(bot: Bot) -> AsyncIOScheduler:
         replace_existing=True,
     )
 
-    # 今日认知 — 9:00 AM ET daily
-    scheduler.add_job(
-        lambda: asyncio.create_task(job_daily_cognition(bot)),
-        CronTrigger(hour=9, minute=0, timezone=SCHEDULER_TIMEZONE),
-        id="daily_cognition",
-        replace_existing=True,
-    )
-
-    # 今日英语升级 — 12:00 PM ET daily
+    # 今日英语升级 — 每天 12:00 北京时间
     scheduler.add_job(
         lambda: asyncio.create_task(job_daily_english(bot)),
         CronTrigger(hour=12, minute=0, timezone=SCHEDULER_TIMEZONE),
@@ -228,11 +214,29 @@ def setup_scheduler(bot: Bot) -> AsyncIOScheduler:
         replace_existing=True,
     )
 
-    # 晚间复盘提醒 — 9:00 PM ET daily
+    # ── 美股时段（北京时间晚间 = 美东白天）────────────────────────────────────
+    # 盘前情报 — 周一至周五 21:30 北京时间 (= 美东 9:30 AM 夏令时)
+    scheduler.add_job(
+        lambda: asyncio.create_task(job_premarket_intel(bot)),
+        CronTrigger(hour=21, minute=30, day_of_week="mon-fri", timezone=SCHEDULER_TIMEZONE),
+        id="premarket_intel",
+        replace_existing=True,
+    )
+
+    # ── 晚间推送 ──────────────────────────────────────────────────────────────
+    # 晚间复盘提醒 — 每天 21:00 北京时间
     scheduler.add_job(
         lambda: asyncio.create_task(job_evening_reminder(bot)),
         CronTrigger(hour=21, minute=0, timezone=SCHEDULER_TIMEZONE),
         id="evening_reminder",
+        replace_existing=True,
+    )
+
+    # 盘后复盘 — 周二至周六 5:00 北京时间 (= 美东前一天 4:30 PM 夏令时)
+    scheduler.add_job(
+        lambda: asyncio.create_task(job_postmarket_intel(bot)),
+        CronTrigger(hour=5, minute=0, day_of_week="tue-sat", timezone=SCHEDULER_TIMEZONE),
+        id="postmarket_intel",
         replace_existing=True,
     )
 

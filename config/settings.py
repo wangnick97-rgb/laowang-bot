@@ -15,7 +15,7 @@ BOT_MODE = os.getenv("BOT_MODE", "polling")
 WEBHOOK_URL = os.getenv("WEBHOOK_URL", "")
 PORT = int(os.getenv("PORT", "8080"))
 
-SCHEDULER_TIMEZONE = os.getenv("SCHEDULER_TIMEZONE", "America/New_York")
+SCHEDULER_TIMEZONE = os.getenv("SCHEDULER_TIMEZONE", "Asia/Shanghai")
 DAILY_USAGE_LIMIT = int(os.getenv("DAILY_USAGE_LIMIT", "20"))
 
 # Claude model tiers

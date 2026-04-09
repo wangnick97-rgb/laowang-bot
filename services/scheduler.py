@@ -127,6 +127,56 @@ async def job_membership_reminder(bot: Bot):
     logger.info("membership_reminder: notified %d expiring members", len(expiring))
 
 
+async def job_daily_cognition(bot: Bot):
+    """推送今日认知主题+思考题给所有会员。"""
+    from bot.handlers.daily_cognition import _TOPICS
+    idx = date.today().toordinal() % len(_TOPICS)
+    topic = _TOPICS[idx]
+
+    text = (
+        f"💡 *今日认知* | {date.today().strftime('%m月%d日')}\n\n"
+        f"📌 *{topic['title']}*\n\n"
+        f"{topic['desc']}\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"❓ *今日思考题：*\n"
+        f"{topic['question']}\n\n"
+        f"👉 发送 /cognition 回答，可得5积分"
+    )
+    await _broadcast(bot, text, "daily_cognition")
+
+
+async def job_daily_english(bot: Bot):
+    """推送今日英语表达给所有会员。"""
+    from bot.handlers.daily_english import _EXPRESSIONS
+    idx = date.today().toordinal() % len(_EXPRESSIONS)
+    expr = _EXPRESSIONS[idx]
+
+    examples_text = "\n".join(f"  • {e}" for e in expr["examples"])
+    text = (
+        f"📝 *今日英语升级*\n\n"
+        f"🎯 今日表达: *{expr['phrase']}*\n\n"
+        f"❌ 中式: {expr['wrong']}\n"
+        f"✅ 地道: {expr['right']}\n\n"
+        f"📖 含义: {expr['meaning']}\n\n"
+        f"💬 例句:\n{examples_text}\n\n"
+        f"👉 发送 /english 用这个表达造句练习，可得3积分"
+    )
+    await _broadcast(bot, text, "daily_english")
+
+
+async def job_evening_reminder(bot: Bot):
+    """晚间复盘+执行检查提醒。"""
+    text = (
+        "🌙 *晚间提醒*\n\n"
+        "今天过得怎么样？花2分钟给自己做个复盘：\n\n"
+        "👉 /review — 晚间复盘（3个问题，+5积分）\n"
+        "👉 /health — 健康打卡\n"
+        "👉 /gym — 健身打卡（如果今天练了）\n\n"
+        "⚡ 老王说：复盘不是为了自责，是为了明天更精准。"
+    )
+    await _broadcast(bot, text, "evening_reminder")
+
+
 def setup_scheduler(bot: Bot) -> AsyncIOScheduler:
     scheduler = AsyncIOScheduler(timezone=SCHEDULER_TIMEZONE)
 
@@ -159,6 +209,30 @@ def setup_scheduler(bot: Bot) -> AsyncIOScheduler:
         lambda: asyncio.create_task(job_membership_reminder(bot)),
         CronTrigger(hour=10, minute=0, timezone=SCHEDULER_TIMEZONE),
         id="membership_reminder",
+        replace_existing=True,
+    )
+
+    # 今日认知 — 9:00 AM ET daily
+    scheduler.add_job(
+        lambda: asyncio.create_task(job_daily_cognition(bot)),
+        CronTrigger(hour=9, minute=0, timezone=SCHEDULER_TIMEZONE),
+        id="daily_cognition",
+        replace_existing=True,
+    )
+
+    # 今日英语升级 — 12:00 PM ET daily
+    scheduler.add_job(
+        lambda: asyncio.create_task(job_daily_english(bot)),
+        CronTrigger(hour=12, minute=0, timezone=SCHEDULER_TIMEZONE),
+        id="daily_english",
+        replace_existing=True,
+    )
+
+    # 晚间复盘提醒 — 9:00 PM ET daily
+    scheduler.add_job(
+        lambda: asyncio.create_task(job_evening_reminder(bot)),
+        CronTrigger(hour=21, minute=0, timezone=SCHEDULER_TIMEZONE),
+        id="evening_reminder",
         replace_existing=True,
     )
 

@@ -24,6 +24,9 @@ REWARDS = [
 
 @require_membership
 async def cmd_points(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if query:
+        await query.answer()
     user_id = update.effective_user.id
     info = get_points_info(user_id)
     points = info.get("points", 0) or 0
@@ -59,7 +62,8 @@ async def cmd_points(update: Update, context: ContextTypes.DEFAULT_TYPE):
         InlineKeyboardButton("🏆 排行榜", callback_data="checkin_leaderboard"),
     ])
 
-    await update.message.reply_text(
+    reply = query.message.reply_text if query else update.message.reply_text
+    await reply(
         text, parse_mode="Markdown",
         reply_markup=InlineKeyboardMarkup(buttons),
     )

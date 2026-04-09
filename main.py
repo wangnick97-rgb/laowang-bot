@@ -1,23 +1,21 @@
 """
 老王工具箱 — Telegram Bot 入口
-Usage:
-  本地开发: python main.py            (polling mode, reads BOT_MODE from .env)
-  生产部署: BOT_MODE=webhook python main.py
+4板块架构: 创业财富 / 个人健康 / 个人成长 / 会员中心
 """
 import logging
-import asyncio
 
 from telegram import BotCommand
 from telegram.ext import (
     Application,
     CommandHandler,
     CallbackQueryHandler,
-    MessageHandler,
-    filters,
 )
 
 from config.settings import TELEGRAM_BOT_TOKEN, BOT_MODE, WEBHOOK_URL, PORT
 from bot.menu import cmd_start, cmd_menu, handle_menu_navigation
+from services.scheduler import setup_scheduler
+
+# ── 创业财富 handlers ────────────────────────────────────────────────────────
 from bot.handlers.news_brief import cmd_news, callback_news
 from bot.handlers.trade_review import build_handler as trade_handler
 from bot.handlers.viral_topic import build_handler as topic_handler
@@ -28,13 +26,10 @@ from bot.handlers.brand_positioning import build_handler as brand_handler
 from bot.handlers.sales_assist import build_handler as sales_handler
 from bot.handlers.property_diag import build_handler as property_handler
 from bot.handlers.landlord_msg import build_handler as landlord_handler
-from bot.handlers.daily_checkin import build_handler as checkin_handler, show_leaderboard, show_badges
 from bot.handlers.daily_poll import cmd_vote, callback_vote
-from bot.handlers.admin import cmd_addmember, cmd_removemember, cmd_members, cmd_stats
-from bot.handlers.join import callback_join
-from bot.handlers.referral import cmd_invite
-from bot.handlers.consultation import build_handler as consult_handler
-from bot.handlers.points_shop import cmd_points, callback_redeem
+from bot.handlers.wealth_static import show_portfolio, show_strategy, show_us_stock_guide
+
+# ── 个人健康 handlers ────────────────────────────────────────────────────────
 from bot.handlers.protein_calc import build_handler as protein_handler
 from bot.handlers.calorie_calc import build_handler as calorie_handler
 from bot.handlers.wang_snacks import show_snacks
@@ -48,7 +43,30 @@ from bot.handlers.wang_plans import show_plan_menu, show_plan_detail
 from bot.handlers.challenges import show_challenges, callback_join_challenge
 from bot.handlers.team import build_handler as team_handler, show_team, show_team_rank
 from bot.handlers.health_report import show_report, send_share_text
-from services.scheduler import setup_scheduler
+
+# ── 个人成长 handlers ────────────────────────────────────────────────────────
+from bot.handlers.daily_cognition import build_handler as cognition_handler
+from bot.handlers.decision_helper import build_handler as decision_handler
+from bot.handlers.evening_review import build_handler as review_handler
+from bot.handlers.text_optimizer import build_handler as text_opt_handler
+from bot.handlers.biz_reply import build_handler as biz_reply_handler
+from bot.handlers.script_polish import build_handler as script_polish_handler
+from bot.handlers.daily_english import build_handler as english_handler
+from bot.handlers.chinglish_fix import build_handler as chinglish_handler
+from bot.handlers.biz_english import build_handler as biz_english_handler
+from bot.handlers.daily_plan import build_handler as plan_handler
+from bot.handlers.deep_work import build_handler as deep_work_handler
+from bot.handlers.procrastination import build_handler as procrastination_handler
+from bot.handlers.challenge_21day import entry as show_21day
+
+# ── 会员中心 handlers ────────────────────────────────────────────────────────
+from bot.handlers.daily_checkin import build_handler as checkin_handler, show_leaderboard, show_badges
+from bot.handlers.points_shop import cmd_points, callback_redeem
+from bot.handlers.consultation import build_handler as consult_handler
+from bot.handlers.referral import cmd_invite
+from bot.handlers.join import callback_join
+from bot.handlers.admin import cmd_addmember, cmd_removemember, cmd_members, cmd_stats
+from bot.handlers.member_center import show_streaks, show_membership_info, callback_invite_redirect
 
 logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -59,30 +77,25 @@ logger = logging.getLogger(__name__)
 BOT_COMMANDS = [
     BotCommand("start", "开始 / 主菜单"),
     BotCommand("menu", "返回主菜单"),
-    BotCommand("trade", "📈 交易复盘"),
+    # 创业财富
     BotCommand("news", "📰 今日简报"),
+    BotCommand("trade", "📈 交易复盘"),
     BotCommand("topic", "🔥 爆款选题"),
-    BotCommand("script", "✍️ 短视频脚本"),
-    BotCommand("brand", "🏷️ 品牌定位"),
-    BotCommand("sales", "📋 销售话术"),
-    BotCommand("property", "🏠 房源诊断"),
-    BotCommand("landlord", "💬 房东话术"),
-    BotCommand("checkin", "🌱 每日签到打卡"),
-    BotCommand("points", "🪙 我的积分"),
-    BotCommand("vote", "🗳️ 每日投票"),
-    BotCommand("badges", "🎖️ 我的成就"),
-    BotCommand("consult", "🎯 1v1 私人咨询"),
-    BotCommand("invite", "🎁 邀请好友"),
-    BotCommand("workout", "🏋️ 今日训练计划"),
+    # 个人健康
+    BotCommand("workout", "🏋️ 今日训练"),
     BotCommand("meal", "🍽️ 今日食谱"),
-    BotCommand("callog", "🥗 记录饮食"),
-    BotCommand("protein", "🧮 蛋白质计算"),
-    BotCommand("calories", "🔥 卡路里计算"),
     BotCommand("gym", "🏃 健身打卡"),
     BotCommand("health", "❤️ 健康打卡"),
-    BotCommand("challenge", "🎯 挑战任务"),
-    BotCommand("team", "👥 我的战队"),
-    BotCommand("report", "📋 健康成绩单"),
+    # 个人成长
+    BotCommand("cognition", "💡 今日认知"),
+    BotCommand("review", "🌙 晚间复盘"),
+    BotCommand("english", "📝 今日英语"),
+    BotCommand("plan", "📋 今日计划"),
+    BotCommand("focus", "🔥 深度工作"),
+    # 会员中心
+    BotCommand("checkin", "✅ 每日签到"),
+    BotCommand("points", "🪙 我的积分"),
+    BotCommand("invite", "🎁 邀请好友"),
     BotCommand("cancel", "取消当前操作"),
     BotCommand("help", "使用说明"),
 ]
@@ -90,14 +103,27 @@ BOT_COMMANDS = [
 
 async def cmd_help(update, context):
     await update.message.reply_text(
-        "*老王工具箱使用说明*\n\n"
-        "/start — 开始/主菜单\n"
-        "/trade — 交易复盘\n"
+        "*老王工具箱 — 使用说明*\n\n"
+        "💰 *创业财富*\n"
         "/news — 今日财经简报\n"
-        "/topic — 爆款选题生成\n"
-        "/cancel — 取消当前对话\n"
-        "/menu — 返回主菜单\n\n"
-        "每天 8:30 AM（美东时间）自动推送财经简报。\n"
+        "/trade — 交易复盘\n"
+        "/topic — 爆款选题\n\n"
+        "💪 *个人健康*\n"
+        "/workout — AI训练计划\n"
+        "/meal — AI食谱\n"
+        "/gym — 健身打卡\n"
+        "/health — 健康打卡\n\n"
+        "🧠 *个人成长*\n"
+        "/cognition — 今日认知训练\n"
+        "/review — 晚间复盘\n"
+        "/english — 今日英语升级\n"
+        "/plan — 今日计划\n\n"
+        "👤 *会员中心*\n"
+        "/checkin — 每日签到\n"
+        "/points — 我的积分\n"
+        "/invite — 邀请好友\n\n"
+        "/menu — 返回主菜单\n"
+        "/cancel — 取消当前操作\n\n"
         "有问题联系 @scorpia2004",
         parse_mode="Markdown",
     )
@@ -106,23 +132,24 @@ async def cmd_help(update, context):
 def build_app() -> Application:
     app = Application.builder().token(TELEGRAM_BOT_TOKEN).post_init(post_init).build()
 
-    # ── Core commands ──────────────────────────────────────────────────────────
+    # ── Core commands ────────────────────────────────────────────────────────
     app.add_handler(CommandHandler("start", cmd_start))
     app.add_handler(CommandHandler("menu", cmd_menu))
     app.add_handler(CommandHandler("help", cmd_help))
     app.add_handler(CommandHandler("news", cmd_news))
-
-    # ── Admin commands ────────────────────────────────────────────────────────
-    app.add_handler(CommandHandler("addmember", cmd_addmember))
-    app.add_handler(CommandHandler("removemember", cmd_removemember))
-    app.add_handler(CommandHandler("members", cmd_members))
-    app.add_handler(CommandHandler("stats", cmd_stats))
     app.add_handler(CommandHandler("invite", cmd_invite))
     app.add_handler(CommandHandler("points", cmd_points))
     app.add_handler(CommandHandler("vote", cmd_vote))
     app.add_handler(CommandHandler("badges", lambda u, c: show_badges(u, c)))
 
-    # ── ConversationHandlers (must be added before generic CallbackQueryHandlers)
+    # ── Admin commands ───────────────────────────────────────────────────────
+    app.add_handler(CommandHandler("addmember", cmd_addmember))
+    app.add_handler(CommandHandler("removemember", cmd_removemember))
+    app.add_handler(CommandHandler("members", cmd_members))
+    app.add_handler(CommandHandler("stats", cmd_stats))
+
+    # ── ConversationHandlers (before generic CallbackQueryHandlers) ────────
+    # 创业财富
     app.add_handler(trade_handler())
     app.add_handler(topic_handler())
     app.add_handler(script_handler())
@@ -130,8 +157,7 @@ def build_app() -> Application:
     app.add_handler(sales_handler())
     app.add_handler(property_handler())
     app.add_handler(landlord_handler())
-    app.add_handler(checkin_handler())
-    app.add_handler(consult_handler())
+    # 个人健康
     app.add_handler(protein_handler())
     app.add_handler(calorie_handler())
     app.add_handler(gym_handler())
@@ -140,33 +166,42 @@ def build_app() -> Application:
     app.add_handler(meal_handler())
     app.add_handler(calorie_log_handler())
     app.add_handler(team_handler())
+    # 个人成长
+    app.add_handler(cognition_handler())
+    app.add_handler(decision_handler())
+    app.add_handler(review_handler())
+    app.add_handler(text_opt_handler())
+    app.add_handler(biz_reply_handler())
+    app.add_handler(script_polish_handler())
+    app.add_handler(english_handler())
+    app.add_handler(chinglish_handler())
+    app.add_handler(biz_english_handler())
+    app.add_handler(plan_handler())
+    app.add_handler(deep_work_handler())
+    app.add_handler(procrastination_handler())
+    # 会员中心
+    app.add_handler(checkin_handler())
+    app.add_handler(consult_handler())
 
-    # ── Menu navigation (sub-menu callbacks) ─────────────────────────────────
-    app.add_handler(CallbackQueryHandler(
-        handle_menu_navigation,
-        pattern="^menu_",
-    ))
+    # ── Menu navigation ──────────────────────────────────────────────────────
+    app.add_handler(CallbackQueryHandler(handle_menu_navigation, pattern="^menu_"))
 
-    # ── Feature callbacks (news, stubs) ───────────────────────────────────────
+    # ── 创业财富 callbacks ───────────────────────────────────────────────────
     app.add_handler(CallbackQueryHandler(callback_news, pattern="^feature_news$"))
     app.add_handler(CallbackQueryHandler(callback_premarket, pattern="^feature_premarket$"))
     app.add_handler(CallbackQueryHandler(callback_postmarket, pattern="^feature_postmarket$"))
-    app.add_handler(CallbackQueryHandler(callback_join, pattern="^join_member$"))
-    app.add_handler(CallbackQueryHandler(show_leaderboard, pattern="^checkin_leaderboard$"))
-    app.add_handler(CallbackQueryHandler(callback_redeem, pattern="^redeem_"))
-    app.add_handler(CallbackQueryHandler(show_badges, pattern="^my_badges$"))
     app.add_handler(CallbackQueryHandler(callback_vote, pattern="^vote_\\d+$"))
+    app.add_handler(CallbackQueryHandler(show_portfolio, pattern="^feature_wang_portfolio$"))
+    app.add_handler(CallbackQueryHandler(show_strategy, pattern="^feature_wang_strategy$"))
+    app.add_handler(CallbackQueryHandler(show_us_stock_guide, pattern="^feature_us_stock_guide$"))
+    app.add_handler(CallbackQueryHandler(cmd_vote, pattern="^feature_vote$"))
 
-    # ── Health module callbacks ──────────────────────────────────────────────
+    # ── 个人健康 callbacks ───────────────────────────────────────────────────
     app.add_handler(CallbackQueryHandler(show_snacks, pattern="^feature_snacks$"))
     app.add_handler(CallbackQueryHandler(show_supplements, pattern="^feature_supplements$"))
     app.add_handler(CallbackQueryHandler(show_health_rank, pattern="^feature_health_rank$"))
-
-    # ── Health Phase 2 callbacks ────────────────────────────────────────────
     app.add_handler(CallbackQueryHandler(show_plan_menu, pattern="^feature_wangplan$"))
     app.add_handler(CallbackQueryHandler(show_plan_detail, pattern="^wplan_"))
-
-    # ── Health Phase 3 callbacks ────────────────────────────────────────────
     app.add_handler(CallbackQueryHandler(show_challenges, pattern="^feature_challenge$"))
     app.add_handler(CallbackQueryHandler(callback_join_challenge, pattern="^join_challenge_"))
     app.add_handler(CallbackQueryHandler(show_team, pattern="^feature_team$"))
@@ -174,7 +209,20 @@ def build_app() -> Application:
     app.add_handler(CallbackQueryHandler(show_report, pattern="^feature_report$"))
     app.add_handler(CallbackQueryHandler(send_share_text, pattern="^copy_report$"))
 
-    # ── Command shortcuts for Phase 3 ──────────────────────────────────────
+    # ── 个人成长 callbacks ───────────────────────────────────────────────────
+    app.add_handler(CallbackQueryHandler(show_21day, pattern="^feature_21day$"))
+
+    # ── 会员中心 callbacks ───────────────────────────────────────────────────
+    app.add_handler(CallbackQueryHandler(callback_join, pattern="^join_member$"))
+    app.add_handler(CallbackQueryHandler(show_leaderboard, pattern="^checkin_leaderboard$"))
+    app.add_handler(CallbackQueryHandler(callback_redeem, pattern="^redeem_"))
+    app.add_handler(CallbackQueryHandler(show_badges, pattern="^my_badges$"))
+    app.add_handler(CallbackQueryHandler(show_streaks, pattern="^feature_streaks$"))
+    app.add_handler(CallbackQueryHandler(show_membership_info, pattern="^feature_membership_info$"))
+    app.add_handler(CallbackQueryHandler(callback_invite_redirect, pattern="^feature_invite$"))
+    app.add_handler(CallbackQueryHandler(cmd_points, pattern="^feature_points$"))
+
+    # ── Command shortcuts ────────────────────────────────────────────────────
     app.add_handler(CommandHandler("challenge", show_challenges))
     app.add_handler(CommandHandler("team", show_team))
     app.add_handler(CommandHandler("report", show_report))

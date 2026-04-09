@@ -153,12 +153,18 @@ def _format_results(poll: dict, counts: dict, user_vote: int = None) -> str:
 
 
 async def cmd_vote(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if query:
+        await query.answer()
+        reply = query.message.reply_text
+    else:
+        reply = update.message.reply_text
+
     user_id = update.effective_user.id
     poll = _today_poll()
 
     if _has_voted(user_id):
         counts = _get_poll_results()
-        # Find user's vote
         db = get_client()
         try:
             r = db.table("daily_polls").select("option_index").eq("poll_key", _poll_key()).eq("user_id", user_id).maybe_single().execute()
@@ -166,7 +172,7 @@ async def cmd_vote(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception:
             user_vote = None
 
-        await update.message.reply_text(
+        await reply(
             _format_results(poll, counts, user_vote),
             parse_mode="Markdown",
             reply_markup=InlineKeyboardMarkup([[
@@ -175,7 +181,7 @@ async def cmd_vote(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    await update.message.reply_text(
+    await reply(
         f"🗳️ *每日一问*\n\n*{poll['q']}*\n\n投票后可以看到其他人的选择 👇",
         parse_mode="Markdown",
         reply_markup=_build_vote_keyboard(poll),

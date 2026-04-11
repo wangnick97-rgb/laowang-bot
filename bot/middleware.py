@@ -2,10 +2,11 @@
 Middleware decorators applied to feature handlers.
 - require_membership: blocks non-members (with free tier preview for some features)
 - require_usage_quota: blocks users over daily limit (tier-aware)
+- redirect_to_dm: in groups, redirect user to private chat
 """
 from functools import wraps
 from telegram import Update
-from telegram.ext import ContextTypes, ConversationHandler
+from telegram.ext import ContextTypes, ConversationHandler, ApplicationHandlerStop
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from db.users import get_user, is_member, check_and_increment_usage, upsert_user
@@ -86,3 +87,37 @@ def auto_register(func):
             upsert_user(tg_user.id, tg_user.username, tg_user.full_name)
         return await func(update, context)
     return wrapper
+
+
+
+# ── 群聊命令拦截：群里使用命令时，提示去私聊 ──────────────────────────────────
+
+# 允许在群里直接执行的命令（群聊专用功能）
+GROUP_ALLOWED_COMMANDS = {"mychat", "groupstats"}
+
+
+async def group_command_redirect(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """拦截群聊中的命令，引导用户去私聊使用。"""
+    chat = update.effective_chat
+    if not chat or chat.type not in ("group", "supergroup"):
+        return  # 私聊不拦截
+
+    # 检查是否是允许在群里执行的命令
+    if update.message and update.message.text:
+        cmd = update.message.text.split()[0].lstrip("/").split("@")[0].lower()
+        if cmd in GROUP_ALLOWED_COMMANDS:
+            return  # 允许执行，不���截
+
+    user = update.effective_user
+    bot_me = await context.bot.get_me()
+    name = user.first_name or user.username or "你"
+
+    await update.message.reply_text(
+        f"👋 *{name}*，请在私聊中使用此功能，保护你的隐私 🔒",
+        parse_mode="Markdown",
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("📱 打开私聊", url=f"https://t.me/{bot_me.username}?start=from_group")],
+        ]),
+    )
+    # 阻止后续 handler 继续处理此命令
+    raise ApplicationHandlerStop()

@@ -71,6 +71,7 @@ from bot.handlers.admin import cmd_addmember, cmd_removemember, cmd_members, cmd
 from bot.handlers.member_center import show_streaks, show_membership_info, callback_invite_redirect
 from bot.handlers.activation import cmd_gencode, cmd_activate, cmd_codes
 from bot.handlers.group_chat import track_group_message, cmd_groupstats, cmd_mychat
+from bot.middleware import group_command_redirect
 
 logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -136,6 +137,13 @@ async def cmd_help(update, context):
 
 def build_app() -> Application:
     app = Application.builder().token(TELEGRAM_BOT_TOKEN).post_init(post_init).build()
+
+    # ── 群聊命令拦截（最高优先级，group=-1）─────────────────────────────────
+    # 在群里使用命令时，提示用户去私聊，保护隐私
+    app.add_handler(MessageHandler(
+        filters.ChatType.GROUPS & filters.COMMAND,
+        group_command_redirect,
+    ), group=-1)
 
     # ── Core commands ────────────────────────────────────────────────────────
     app.add_handler(CommandHandler("start", cmd_start))

@@ -42,7 +42,7 @@ async def lifespan(app: FastAPI):
     # Set webhook
     if BOT_MODE == "webhook" and WEBHOOK_URL:
         webhook_url = f"{WEBHOOK_URL}/{TELEGRAM_BOT_TOKEN}"
-        await _ptb_app.bot.set_webhook(url=webhook_url, allowed_updates=["message", "callback_query"])
+        await _ptb_app.bot.set_webhook(url=webhook_url, allowed_updates=["message", "callback_query", "my_chat_member"])
         logger.info("Webhook set: %s", webhook_url)
 
     # Start updater processing (without running its own web server)

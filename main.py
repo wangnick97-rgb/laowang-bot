@@ -9,6 +9,8 @@ from telegram.ext import (
     Application,
     CommandHandler,
     CallbackQueryHandler,
+    MessageHandler,
+    filters,
 )
 
 from config.settings import TELEGRAM_BOT_TOKEN, BOT_MODE, WEBHOOK_URL, PORT
@@ -68,6 +70,7 @@ from bot.handlers.join import callback_join
 from bot.handlers.admin import cmd_addmember, cmd_removemember, cmd_members, cmd_stats
 from bot.handlers.member_center import show_streaks, show_membership_info, callback_invite_redirect
 from bot.handlers.activation import cmd_gencode, cmd_activate, cmd_codes
+from bot.handlers.group_chat import track_group_message, cmd_groupstats, cmd_mychat
 
 logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -155,6 +158,8 @@ def build_app() -> Application:
     app.add_handler(CommandHandler("members", cmd_members))
     app.add_handler(CommandHandler("stats", cmd_stats))
     app.add_handler(CommandHandler("signal", cmd_signal))
+    app.add_handler(CommandHandler("groupstats", cmd_groupstats))
+    app.add_handler(CommandHandler("mychat", cmd_mychat))
 
     # ── ConversationHandlers (before generic CallbackQueryHandlers) ────────
     # 创业财富
@@ -239,6 +244,12 @@ def build_app() -> Application:
     app.add_handler(CommandHandler("team", show_team))
     app.add_handler(CommandHandler("report", show_report))
 
+    # ── 群聊消息追踪（必须放最后，只追踪群组消息）──────────────────────────
+    app.add_handler(MessageHandler(
+        filters.ChatType.GROUPS & filters.TEXT & ~filters.COMMAND,
+        track_group_message,
+    ))
+
     return app
 
 
@@ -259,11 +270,11 @@ def main():
             port=PORT,
             url_path=TELEGRAM_BOT_TOKEN,
             webhook_url=f"{WEBHOOK_URL}/{TELEGRAM_BOT_TOKEN}",
-            allowed_updates=["message", "callback_query"],
+            allowed_updates=["message", "callback_query", "my_chat_member"],
         )
     else:
         logger.info("Starting in polling mode (local dev)...")
-        app.run_polling(allowed_updates=["message", "callback_query"])
+        app.run_polling(allowed_updates=["message", "callback_query", "my_chat_member"])
 
 
 if __name__ == "__main__":

@@ -19,7 +19,7 @@ REFERRAL_REWARD_DAYS = 7
 # 邀请积分奖励（按邀请人tier）
 # {inviter_tier: (inviter_points, invitee_points)}
 REFERRAL_POINTS = {
-    "free":   (50,  50),    # 免费用户邀请：双方各50
+    "free":   (10,  10),    # 免费用户邀请：双方各10
     "member": (100, 80),    # 会员邀请：邀请人100，新人80
     "vip":    (200, 150),   # 私董会邀请：邀请人200，新人150
     "admin":  (200, 150),
@@ -72,7 +72,7 @@ async def cmd_invite(update: Update, context: ContextTypes.DEFAULT_TYPE):
         + (f"• 额外 *{REFERRAL_REWARD_DAYS} 天*会员延期\n" if tier in ("member", "vip", "admin") else "")
         + f"\n"
         f"💡 *升级会员，邀请奖励更多！*\n"
-        f"  免费: 双方各50分\n"
+        f"  免费: 双方各10分\n"
         f"  会员: 邀请人100 + 新人80\n"
         f"  私董会: 邀请人200 + 新人150\n\n"
         f"长按链接复制即可 👆",

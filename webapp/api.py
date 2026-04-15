@@ -679,18 +679,48 @@ def _award_points(user_id: int, amount: int):
 
 @app.get("/api/h5/features")
 async def h5_features():
-    """返回所有可用 H5 AI 功能列表（前端动态渲染用）。"""
+    """返回所有可用 H5 功能列表（AI + 静态 + 打卡 + 工具）。"""
+    # type: ai_input (generic AI) / special (自定义页面) / static (静态内容) / tool / checkin
     result = {"growth": [], "health": [], "wealth": []}
+
+    # 添加所有 AI 输入型功能
     for key, f in H5_FEATURES.items():
         result[f["category"]].append({
             "key": key,
             "name": f["name"],
             "emoji": f["emoji"],
             "points": f["points"],
+            "type": "ai_input",
         })
-    # 添加特殊功能
-    result["growth"].insert(0, {"key": "daily_cognition", "name": "今日认知", "emoji": "💡", "points": 5})
-    result["wealth"].insert(0, {"key": "news_brief", "name": "今日简报", "emoji": "📰", "points": 0})
+
+    # 添加特殊功能（有自定义页面的）
+    special = {
+        "growth": [
+            {"key": "daily_cognition", "name": "今日认知", "emoji": "💡", "points": 5, "type": "special"},
+            {"key": "deep_work", "name": "深度工作打卡", "emoji": "🔥", "points": 10, "type": "special"},
+        ],
+        "wealth": [
+            {"key": "news_brief", "name": "今日简报", "emoji": "📰", "points": 0, "type": "special"},
+            {"key": "premarket", "name": "盘前情报", "emoji": "📊", "points": 0, "type": "special"},
+            {"key": "postmarket", "name": "盘后复盘", "emoji": "📉", "points": 0, "type": "special"},
+            {"key": "portfolio", "name": "老王持仓", "emoji": "💡", "points": 0, "type": "special"},
+            {"key": "strategy", "name": "投资策略", "emoji": "📋", "points": 0, "type": "static"},
+            {"key": "us_stock", "name": "美股开户教程", "emoji": "🏦", "points": 0, "type": "static"},
+        ],
+        "health": [
+            {"key": "gym_log", "name": "健身打卡", "emoji": "🏃", "points": 8, "type": "special"},
+            {"key": "protein_calc", "name": "蛋白质计算", "emoji": "🧮", "points": 0, "type": "tool"},
+            {"key": "calorie_calc", "name": "卡路里计算", "emoji": "🔥", "points": 0, "type": "tool"},
+            {"key": "snacks", "name": "零食白名单", "emoji": "🍫", "points": 0, "type": "static"},
+            {"key": "supplements", "name": "老王补给", "emoji": "💊", "points": 0, "type": "static"},
+            {"key": "plans", "name": "老王计划库", "emoji": "💪", "points": 0, "type": "special"},
+        ],
+    }
+
+    for cat in ["growth", "wealth", "health"]:
+        for item in special.get(cat, []):
+            result[cat].insert(0, item) if item["type"] == "special" else result[cat].append(item)
+
     return result
 
 
@@ -862,6 +892,310 @@ async def h5_redeem(payload: dict = Body(...), user: dict = Depends(get_h5_user)
     new_points = (info.data or {}).get("points", 0)
 
     return {"success": True, "remaining_points": new_points, "reward": reward["name"]}
+
+
+# ── 盘前盘后情报 ────────────────────────────────────────────────────────────
+
+@app.get("/api/h5/premarket")
+async def h5_premarket(user: dict = Depends(get_h5_user)):
+    """盘前情报（抓数据 + AI 分析）。"""
+    from services.market_data import get_market_snapshot, format_snapshot_for_claude
+    from datetime import datetime
+    user_id = user["id"]
+    try:
+        snapshot = get_market_snapshot()
+        market_text = format_snapshot_for_claude(snapshot)
+        date_str = datetime.now().strftime("%Y年%m月%d日")
+        result = await call_claude(
+            "market_intel_pre",
+            market_text,
+            user_id=user_id,
+            max_tokens=900,
+            extra_context=f"当前时间（美东）：{date_str}",
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取盘前情报失败: {str(e)[:100]}")
+    return {"result": _content_safety_check(result)}
+
+
+@app.get("/api/h5/postmarket")
+async def h5_postmarket(user: dict = Depends(get_h5_user)):
+    """盘后复盘。"""
+    from services.market_data import get_market_snapshot, format_snapshot_for_claude
+    from datetime import datetime
+    user_id = user["id"]
+    try:
+        snapshot = get_market_snapshot()
+        market_text = format_snapshot_for_claude(snapshot)
+        date_str = datetime.now().strftime("%Y年%m月%d日")
+        result = await call_claude(
+            "market_intel_post",
+            market_text,
+            user_id=user_id,
+            max_tokens=900,
+            extra_context=f"当前时间（美东）：{date_str}",
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取盘后复盘失败: {str(e)[:100]}")
+    return {"result": _content_safety_check(result)}
+
+
+# ── 老王持仓 (按tier显示) ──────────────────────────────────────────────────
+
+@app.get("/api/h5/portfolio")
+async def h5_portfolio(user: dict = Depends(get_h5_user)):
+    """老王持仓 — 按tier分层返回。"""
+    from bot.handlers.wealth_static import _FULL_PORTFOLIO, _FREE_COUNT
+    user_id = user["id"]
+    db = get_client()
+    urow = db.table("users").select("membership_tier, membership_status").eq("id", user_id).maybe_single().execute()
+    u = (urow.data or {})
+    tier = u.get("membership_tier", "free")
+    if u.get("membership_status") == "admin":
+        tier = "admin"
+
+    if tier in ("vip", "admin"):
+        # 完整持仓 + 最近信号
+        stocks = _FULL_PORTFOLIO
+        signals = db.table("trade_signals").select("*").order("created_at", desc=True).limit(5).execute()
+        return {
+            "tier": tier,
+            "stocks": stocks,
+            "signals": signals.data or [],
+            "is_full": True,
+        }
+    elif tier == "member":
+        return {
+            "tier": tier,
+            "stocks": _FULL_PORTFOLIO,
+            "signals": [],
+            "is_full": True,
+            "note": "升级私董会可查看实时持仓 + 每笔交易推送",
+        }
+    else:
+        return {
+            "tier": tier,
+            "stocks": _FULL_PORTFOLIO[:_FREE_COUNT],
+            "signals": [],
+            "is_full": False,
+            "locked_count": len(_FULL_PORTFOLIO) - _FREE_COUNT,
+            "note": "开通会员查看全部持仓",
+        }
+
+
+# ── 静态内容端点 ──────────────────────────────────────────────────────────────
+
+@app.get("/api/h5/content/{key}")
+async def h5_content(key: str, user: dict = Depends(get_h5_user)):
+    """静态内容端点：strategy/us_stock/snacks/supplements/membership/plans"""
+    from webapp import h5_content as hc
+    mapping = {
+        "strategy": {"title": "📋 老王投资策略", "text": hc.STRATEGY_TEXT},
+        "us_stock": {"title": "🏦 美股开户教程", "text": hc.US_STOCK_TEXT},
+        "snacks": {"title": "🍫 零食白名单", "text": hc.SNACKS_TEXT},
+        "supplements": {"title": "💊 老王补给", "text": hc.SUPPLEMENTS_TEXT},
+    }
+    if key in mapping:
+        return mapping[key]
+    if key == "membership":
+        return {"title": "💎 会员权益", "data": hc.MEMBERSHIP_INFO}
+    if key == "plans":
+        return {"title": "💪 老王计划库", "plans": hc.WANG_PLANS}
+    raise HTTPException(status_code=404, detail="内容不存在")
+
+
+# ── 计算器 ──────────────────────────────────────────────────────────────────
+
+@app.post("/api/h5/calc/protein")
+async def h5_calc_protein(payload: dict = Body(...), user: dict = Depends(get_h5_user)):
+    """蛋白质计算器。"""
+    weight = float((payload or {}).get("weight", 0))
+    goal = (payload or {}).get("goal", "maintain")  # lose/maintain/gain
+    activity = (payload or {}).get("activity", "mid")  # low/mid/high
+    if weight <= 0:
+        raise HTTPException(status_code=400, detail="体重必须大于0")
+
+    # 每 kg 蛋白质需要
+    multipliers = {
+        ("lose", "low"): 1.6,
+        ("lose", "mid"): 1.8,
+        ("lose", "high"): 2.2,
+        ("maintain", "low"): 1.2,
+        ("maintain", "mid"): 1.6,
+        ("maintain", "high"): 1.8,
+        ("gain", "low"): 1.6,
+        ("gain", "mid"): 1.8,
+        ("gain", "high"): 2.2,
+    }
+    mult = multipliers.get((goal, activity), 1.6)
+    daily_g = round(weight * mult)
+
+    return {
+        "daily_grams": daily_g,
+        "per_meal_3": round(daily_g / 3),
+        "per_meal_4": round(daily_g / 4),
+        "sources": [
+            f"鸡胸肉 {round(daily_g / 0.23)}g（约 {round(daily_g / 0.23 / 100, 1)} 份）",
+            f"鸡蛋 {round(daily_g / 6)} 个",
+            f"蛋白粉 {round(daily_g / 25)} 勺（每勺25g）",
+            f"牛肉 {round(daily_g / 0.26)}g",
+            f"鱼肉 {round(daily_g / 0.22)}g",
+        ],
+        "tip": "训练日可加10-20%，休息日按此数。优先真食物 > 蛋白粉。",
+    }
+
+
+@app.post("/api/h5/calc/calorie")
+async def h5_calc_calorie(payload: dict = Body(...), user: dict = Depends(get_h5_user)):
+    """卡路里计算器 (Mifflin-St Jeor)。"""
+    weight = float((payload or {}).get("weight", 0))
+    height = float((payload or {}).get("height", 0))
+    age = int((payload or {}).get("age", 0))
+    gender = (payload or {}).get("gender", "male")  # male/female
+    activity = (payload or {}).get("activity", "mid")  # low/mid/high/very_high
+    goal = (payload or {}).get("goal", "maintain")
+
+    if weight <= 0 or height <= 0 or age <= 0:
+        raise HTTPException(status_code=400, detail="请填写完整的体重/身高/年龄")
+
+    # BMR (Mifflin-St Jeor)
+    if gender == "male":
+        bmr = 10 * weight + 6.25 * height - 5 * age + 5
+    else:
+        bmr = 10 * weight + 6.25 * height - 5 * age - 161
+
+    # TDEE
+    factors = {"low": 1.2, "mid": 1.55, "high": 1.725, "very_high": 1.9}
+    tdee = bmr * factors.get(activity, 1.55)
+
+    # 目标调整
+    target = tdee
+    if goal == "lose": target = tdee - 500
+    elif goal == "gain": target = tdee + 300
+
+    return {
+        "bmr": round(bmr),
+        "tdee": round(tdee),
+        "target": round(target),
+        "macros": {
+            "protein_g": round(weight * 1.8),
+            "fat_g": round(target * 0.25 / 9),
+            "carbs_g": round((target - weight * 1.8 * 4 - target * 0.25) / 4),
+        },
+        "tip": f"目标: {'减脂' if goal == 'lose' else '增肌' if goal == 'gain' else '维持'} - 每日约 {round(target)} 大卡",
+    }
+
+
+# ── 健身打卡 ────────────────────────────────────────────────────────────────
+
+@app.post("/api/h5/gym-log")
+async def h5_gym_log(payload: dict = Body(...), user: dict = Depends(get_h5_user)):
+    """健身打卡记录。"""
+    from db.health import do_gym_log
+    user_id = user["id"]
+    workout_type = (payload or {}).get("workout_type", "全身")
+    duration = int((payload or {}).get("duration_min", 30))
+    intensity = int((payload or {}).get("intensity", 3))
+    notes = (payload or {}).get("notes", "").strip()
+
+    if duration <= 0 or duration > 300:
+        raise HTTPException(status_code=400, detail="训练时长应在1-300分钟之间")
+    if intensity < 1 or intensity > 5:
+        raise HTTPException(status_code=400, detail="强度必须为1-5")
+
+    result = do_gym_log(user_id, workout_type, duration, intensity, notes)
+    return result
+
+
+# ── 深度工作打卡 ──────────────────────────────────────────────────────────────
+
+@app.post("/api/h5/deep-work")
+async def h5_deep_work(payload: dict = Body(...), user: dict = Depends(get_h5_user)):
+    """深度工作打卡 — 记录一次专注时段。"""
+    user_id = user["id"]
+    duration = int((payload or {}).get("duration_min", 0))
+    task = (payload or {}).get("task", "").strip()
+
+    if duration <= 0:
+        raise HTTPException(status_code=400, detail="时长必须大于0")
+
+    # 按时长给分: 25分=+5, 60分=+10, 90分+=+15
+    if duration >= 90:
+        points = 15
+    elif duration >= 60:
+        points = 10
+    elif duration >= 25:
+        points = 5
+    else:
+        points = 2
+
+    new_total = _award_points(user_id, points)
+    return {
+        "success": True,
+        "points_earned": points,
+        "total_points": new_total,
+        "duration_min": duration,
+        "task": task,
+    }
+
+
+# ── 成绩单 (用户综合数据) ────────────────────────────────────────────────────
+
+@app.get("/api/h5/report")
+async def h5_report(user: dict = Depends(get_h5_user)):
+    """用户综合成绩单：积分+连续+健身+健康+AI次数。"""
+    user_id = user["id"]
+    db = get_client()
+    urow = db.table("users").select(
+        "points, checkin_streak, health_streak, gym_count, badges, full_name, username"
+    ).eq("id", user_id).maybe_single().execute()
+    u = urow.data or {}
+
+    # 本月统计
+    from datetime import datetime
+    month_start = datetime.now().replace(day=1).date().isoformat()
+    checkins = db.table("checkin_logs").select("id", count="exact").eq("user_id", user_id).gte("checkin_date", month_start).execute()
+    gym_logs = db.table("gym_logs").select("id", count="exact").eq("user_id", user_id).gte("log_date", month_start).execute()
+    health_logs = db.table("health_checkins").select("id", count="exact").eq("user_id", user_id).gte("checkin_date", month_start).execute()
+
+    # 今日AI使用次数
+    today = _date.today().isoformat()
+    ai_logs = db.table("usage_logs").select("id", count="exact").eq("user_id", user_id).gte("created_at", f"{today}T00:00:00").execute()
+
+    return {
+        "name": u.get("full_name") or u.get("username") or str(user_id),
+        "points": u.get("points", 0) or 0,
+        "checkin_streak": u.get("checkin_streak", 0) or 0,
+        "health_streak": u.get("health_streak", 0) or 0,
+        "gym_count": u.get("gym_count", 0) or 0,
+        "badges_count": len(u.get("badges") or []),
+        "this_month": {
+            "checkins": checkins.count or 0,
+            "gym": gym_logs.count or 0,
+            "health": health_logs.count or 0,
+        },
+        "today_ai_calls": ai_logs.count or 0,
+    }
+
+
+# ── 徽章成就 ────────────────────────────────────────────────────────────────
+
+@app.get("/api/h5/badges")
+async def h5_badges(user: dict = Depends(get_h5_user)):
+    """用户成就徽章（区分已解锁/未解锁）。"""
+    user_id = user["id"]
+    info = get_points_info(user_id)
+    user_badges = info.get("badges") or []
+    all_badges = []
+    for badge_id, badge_info in ACHIEVEMENTS.items():
+        all_badges.append({
+            "id": badge_id,
+            "name": badge_info["name"],
+            "emoji": badge_info["emoji"],
+            "desc": badge_info["desc"],
+            "unlocked": badge_id in user_badges,
+        })
+    return {"badges": all_badges, "unlocked_count": len(user_badges), "total": len(all_badges)}
 
 
 @app.get("/api/h5/leaderboard")

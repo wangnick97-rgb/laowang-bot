@@ -675,6 +675,25 @@ textarea { resize: none; min-height: 140px; line-height: 1.6; }
     </div>
   </div>
 
+  <div class="quick-actions">
+    <div class="qa-btn" onclick="openScreen('report')">
+      <div class="qa-icon">📋</div>
+      <div class="qa-label">成绩单</div>
+    </div>
+    <div class="qa-btn" onclick="openScreen('badges')">
+      <div class="qa-icon">🎖️</div>
+      <div class="qa-label">成就</div>
+    </div>
+    <div class="qa-btn" onclick="openScreen('membership')">
+      <div class="qa-icon">💎</div>
+      <div class="qa-label">会员</div>
+    </div>
+    <div class="qa-btn" onclick="openScreen('health')">
+      <div class="qa-icon">❤️</div>
+      <div class="qa-label">打卡</div>
+    </div>
+  </div>
+
   <div id="features-container"></div>
 
   <div style="height:32px"></div>
@@ -740,6 +759,210 @@ textarea { resize: none; min-height: 140px; line-height: 1.6; }
   <div id="news-content" style="display:none">
     <div class="feedback-box" id="news-result"></div>
   </div>
+</div>
+
+<!-- ── Premarket / Postmarket ───────────── -->
+<div id="screen-market" class="screen">
+  <div class="nav-top">
+    <div class="back" onclick="openScreen('home')">←</div>
+    <div class="title" id="market-title">-</div>
+  </div>
+  <div id="market-loading" class="loading">抓取市场数据中</div>
+  <div id="market-content" style="display:none">
+    <div class="feedback-box" id="market-result"></div>
+  </div>
+</div>
+
+<!-- ── Portfolio ───────────── -->
+<div id="screen-portfolio" class="screen">
+  <div class="nav-top">
+    <div class="back" onclick="openScreen('home')">←</div>
+    <div class="title">💡 老王持仓</div>
+  </div>
+  <div id="portfolio-loading" class="loading">加载持仓</div>
+  <div id="portfolio-content" style="display:none"></div>
+</div>
+
+<!-- ── Static Content (strategy/us_stock/snacks/supplements) ───────────── -->
+<div id="screen-static" class="screen">
+  <div class="nav-top">
+    <div class="back" onclick="openScreen('home')">←</div>
+    <div class="title" id="static-title">-</div>
+  </div>
+  <div id="static-loading" class="loading">加载</div>
+  <div id="static-content" style="display:none">
+    <div class="feedback-box" id="static-text"></div>
+  </div>
+</div>
+
+<!-- ── 老王计划库 ───────────── -->
+<div id="screen-plans" class="screen">
+  <div class="nav-top">
+    <div class="back" onclick="openScreen('home')">←</div>
+    <div class="title">💪 老王计划库</div>
+  </div>
+  <div id="plans-list"></div>
+</div>
+
+<div id="screen-plan-detail" class="screen">
+  <div class="nav-top">
+    <div class="back" onclick="openScreen('plans')">←</div>
+    <div class="title" id="plan-detail-title">-</div>
+  </div>
+  <div class="feedback-box" id="plan-detail-text"></div>
+</div>
+
+<!-- ── 蛋白质计算 ───────────── -->
+<div id="screen-protein" class="screen">
+  <div class="nav-top">
+    <div class="back" onclick="openScreen('home')">←</div>
+    <div class="title">🧮 蛋白质计算器</div>
+  </div>
+  <div class="card health-form">
+    <label>体重 (kg)</label>
+    <input type="number" id="p-weight" placeholder="例如 70" />
+    <label>目标</label>
+    <div class="toggle">
+      <button onclick="setProteinGoal('lose')">减脂</button>
+      <button onclick="setProteinGoal('maintain')" class="on">维持</button>
+      <button onclick="setProteinGoal('gain')">增肌</button>
+    </div>
+    <label>活动量</label>
+    <div class="toggle">
+      <button onclick="setProteinAct('low')">久坐</button>
+      <button onclick="setProteinAct('mid')" class="on">中等</button>
+      <button onclick="setProteinAct('high')">高强度</button>
+    </div>
+    <div style="height:18px"></div>
+    <button onclick="calcProtein()">计算</button>
+  </div>
+  <div id="protein-result" style="display:none" class="feedback-box"></div>
+</div>
+
+<!-- ── 卡路里计算 ───────────── -->
+<div id="screen-calorie" class="screen">
+  <div class="nav-top">
+    <div class="back" onclick="openScreen('home')">←</div>
+    <div class="title">🔥 卡路里计算器</div>
+  </div>
+  <div class="card health-form">
+    <label>性别</label>
+    <div class="toggle">
+      <button onclick="setCalGender('male')" class="on">男</button>
+      <button onclick="setCalGender('female')">女</button>
+    </div>
+    <label>年龄</label>
+    <input type="number" id="c-age" placeholder="例如 30" />
+    <label>体重 (kg)</label>
+    <input type="number" id="c-weight" placeholder="例如 70" />
+    <label>身高 (cm)</label>
+    <input type="number" id="c-height" placeholder="例如 175" />
+    <label>活动量</label>
+    <div class="toggle">
+      <button onclick="setCalAct('low')">久坐</button>
+      <button onclick="setCalAct('mid')" class="on">中等</button>
+      <button onclick="setCalAct('high')">高强度</button>
+    </div>
+    <label>目标</label>
+    <div class="toggle">
+      <button onclick="setCalGoal('lose')">减脂</button>
+      <button onclick="setCalGoal('maintain')" class="on">维持</button>
+      <button onclick="setCalGoal('gain')">增肌</button>
+    </div>
+    <div style="height:18px"></div>
+    <button onclick="calcCalorie()">计算</button>
+  </div>
+  <div id="calorie-result" style="display:none" class="feedback-box"></div>
+</div>
+
+<!-- ── 健身打卡 ───────────── -->
+<div id="screen-gym" class="screen">
+  <div class="nav-top">
+    <div class="back" onclick="openScreen('home')">←</div>
+    <div class="title">🏃 健身打卡</div>
+  </div>
+  <div class="card health-form">
+    <label>训练类型</label>
+    <div class="toggle" style="flex-wrap:wrap">
+      <button onclick="setGymType('胸')">胸</button>
+      <button onclick="setGymType('背')">背</button>
+      <button onclick="setGymType('腿')">腿</button>
+      <button onclick="setGymType('肩')">肩</button>
+      <button onclick="setGymType('手臂')">手臂</button>
+      <button onclick="setGymType('全身')" class="on">全身</button>
+      <button onclick="setGymType('有氧')">有氧</button>
+      <button onclick="setGymType('其他')">其他</button>
+    </div>
+    <label>训练时长（分钟）</label>
+    <input type="number" id="g-duration" placeholder="例如 60" />
+    <label>强度 (1-5)</label>
+    <div class="toggle">
+      <button onclick="setGymIntensity(1)">1</button>
+      <button onclick="setGymIntensity(2)">2</button>
+      <button onclick="setGymIntensity(3)" class="on">3</button>
+      <button onclick="setGymIntensity(4)">4</button>
+      <button onclick="setGymIntensity(5)">5</button>
+    </div>
+    <label>笔记（可选）</label>
+    <textarea id="g-notes" placeholder="记录今天的感受..."></textarea>
+    <div style="height:18px"></div>
+    <button onclick="submitGym()">提交打卡</button>
+  </div>
+</div>
+
+<!-- ── 深度工作 ───────────── -->
+<div id="screen-deepwork" class="screen">
+  <div class="nav-top">
+    <div class="back" onclick="openScreen('home')">←</div>
+    <div class="title">🔥 深度工作打卡</div>
+  </div>
+  <div class="card">
+    <h3>记录一次专注时段</h3>
+    <p class="sub" style="margin-bottom:14px">深度工作 = 无干扰 + 单任务 + 产出</p>
+  </div>
+  <div class="card health-form">
+    <label>专注时长</label>
+    <div class="toggle" style="flex-wrap:wrap">
+      <button onclick="setDeepTime(25)">🍅 25分</button>
+      <button onclick="setDeepTime(45)">📚 45分</button>
+      <button onclick="setDeepTime(60)" class="on">⚡ 60分</button>
+      <button onclick="setDeepTime(90)">🔥 90分</button>
+      <button onclick="setDeepTime(120)">🐉 120分</button>
+    </div>
+    <label>任务 (可选)</label>
+    <input type="text" id="dw-task" placeholder="你在专注做什么？" />
+    <div style="height:18px"></div>
+    <button onclick="submitDeepWork()">提交打卡</button>
+  </div>
+</div>
+
+<!-- ── 会员权益 ───────────── -->
+<div id="screen-membership" class="screen">
+  <div class="nav-top">
+    <div class="back" onclick="openScreen('home')">←</div>
+    <div class="title">💎 会员权益</div>
+  </div>
+  <div id="membership-content"></div>
+</div>
+
+<!-- ── 成绩单 ───────────── -->
+<div id="screen-report" class="screen">
+  <div class="nav-top">
+    <div class="back" onclick="openScreen('home')">←</div>
+    <div class="title">📋 我的成绩单</div>
+  </div>
+  <div id="report-loading" class="loading">加载</div>
+  <div id="report-content" style="display:none"></div>
+</div>
+
+<!-- ── 我的成就 ───────────── -->
+<div id="screen-badges" class="screen">
+  <div class="nav-top">
+    <div class="back" onclick="openScreen('home')">←</div>
+    <div class="title">🎖️ 我的成就</div>
+  </div>
+  <div id="badges-loading" class="loading">加载</div>
+  <div id="badges-content"></div>
 </div>
 
 <!-- ── Leaderboard ───────────── -->
@@ -842,7 +1065,9 @@ let currentMood = '😊';
 function $(id) { return document.getElementById(id); }
 function openScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  $('screen-' + name).classList.add('active');
+  const el = $('screen-' + name);
+  if (!el) return;
+  el.classList.add('active');
   window.scrollTo(0, 0);
 
   if (name === 'cognition') loadCognition();
@@ -850,6 +1075,11 @@ function openScreen(name) {
   if (name === 'leaderboard') loadLeaderboard();
   if (name === 'shop') loadShop();
   if (name === 'invite') loadInvite();
+  if (name === 'portfolio') loadPortfolio();
+  if (name === 'plans') loadPlans();
+  if (name === 'membership') loadMembership();
+  if (name === 'report') loadReport();
+  if (name === 'badges') loadBadges();
 }
 function toast(msg) {
   const t = $('toast');
@@ -1037,9 +1267,37 @@ async function submitCognition() {
 
 // ── Generic AI Feature ─────────────────
 async function openFeature(key, emoji, name) {
-  if (key === 'daily_cognition') { openScreen('cognition'); return; }
-  if (key === 'news_brief') { openScreen('news'); return; }
+  // Special screens
+  const specialMap = {
+    daily_cognition: 'cognition',
+    news_brief: 'news',
+    premarket: 'market',
+    postmarket: 'market',
+    portfolio: 'portfolio',
+    gym_log: 'gym',
+    deep_work: 'deepwork',
+    protein_calc: 'protein',
+    calorie_calc: 'calorie',
+    plans: 'plans',
+  };
+  const staticKeys = ['strategy', 'us_stock', 'snacks', 'supplements'];
 
+  if (specialMap[key]) {
+    if (key === 'premarket' || key === 'postmarket') {
+      $('market-title').textContent = `${emoji} ${name}`;
+      openScreen('market');
+      loadMarket(key);
+      return;
+    }
+    openScreen(specialMap[key]);
+    return;
+  }
+  if (staticKeys.includes(key)) {
+    loadStatic(key);
+    return;
+  }
+
+  // Default: generic AI input page
   currentFeature = key;
   $('ai-title').textContent = `${emoji} ${name}`;
   $('ai-input').value = '';
@@ -1051,6 +1309,321 @@ async function openFeature(key, emoji, name) {
     const info = await api('/api/h5/feature/' + key);
     $('ai-label').textContent = info.input_label;
     $('ai-input').placeholder = info.placeholder;
+  } catch (e) { toast(e.message); }
+}
+
+// ── Premarket / Postmarket ─────────────
+async function loadMarket(key) {
+  $('market-loading').style.display = 'block';
+  $('market-content').style.display = 'none';
+  try {
+    const r = await api('/api/h5/' + key);
+    $('market-result').textContent = r.result;
+    $('market-loading').style.display = 'none';
+    $('market-content').style.display = 'block';
+  } catch (e) {
+    $('market-loading').textContent = '加载失败：' + e.message;
+  }
+}
+
+// ── Portfolio ─────────────
+async function loadPortfolio() {
+  $('portfolio-loading').style.display = 'block';
+  $('portfolio-content').style.display = 'none';
+  try {
+    const d = await api('/api/h5/portfolio');
+    const cats = { '核心': [], '成长': [], '防守': [], '观察': [] };
+    for (const s of d.stocks) {
+      if (cats[s.weight]) cats[s.weight].push(s);
+    }
+    let html = '';
+    const tierLabel = d.tier === 'vip' || d.tier === 'admin' ? '👑 私董会 · 完整持仓'
+      : d.tier === 'member' ? '💎 会员 · 季度快照' : '🆓 免费预览';
+    html += `<div class="card"><h3>${tierLabel}</h3>`;
+    for (const [name, stocks] of Object.entries(cats)) {
+      if (!stocks.length) continue;
+      html += `<div style="margin-top:16px"><div class="section-title" style="margin:0 0 10px">${name}仓位</div>`;
+      for (const s of stocks) {
+        html += `<div style="padding:10px 0; border-bottom: 1px solid var(--border-soft);">
+          <div style="display:flex; justify-content:space-between; align-items:center">
+            <div>
+              <span style="font-family:'SF Mono',Menlo,monospace; color:var(--accent-2); font-weight:600">${s.ticker}</span>
+              <span style="margin-left:8px">${s.name}</span>
+            </div>
+            <div style="font-size:12px">${s.direction}</div>
+          </div>
+          ${s.note ? `<div class="sub" style="margin-top:4px; font-size:12px">${s.note}</div>` : ''}
+        </div>`;
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+
+    if (d.signals && d.signals.length) {
+      html += '<div class="card"><h3>📡 最近交易信号</h3>';
+      for (const s of d.signals) {
+        const emoji = s.direction === 'buy' ? '🟢' : '🔴';
+        html += `<div style="padding:10px 0; border-bottom:1px solid var(--border-soft)">
+          <div>${emoji} ${s.action} <span class="mono">${s.ticker}</span> ${s.price || ''}</div>
+          ${s.reason ? `<div class="sub" style="margin-top:4px">${s.reason}</div>` : ''}
+        </div>`;
+      }
+      html += '</div>';
+    }
+
+    if (d.locked_count) {
+      html += `<div class="card" style="text-align:center"><h3>🔒 还有 ${d.locked_count} 只锁定</h3>
+        <p class="sub">${d.note}</p>
+        <div style="height:12px"></div>
+        <button onclick="openScreen('membership')">升级会员</button>
+      </div>`;
+    } else if (d.note) {
+      html += `<div class="card"><p class="sub">${d.note}</p></div>`;
+    }
+
+    $('portfolio-content').innerHTML = html;
+    $('portfolio-loading').style.display = 'none';
+    $('portfolio-content').style.display = 'block';
+  } catch (e) {
+    $('portfolio-loading').textContent = '加载失败: ' + e.message;
+  }
+}
+
+// ── Static Content ─────────────
+async function loadStatic(key) {
+  $('static-loading').style.display = 'block';
+  $('static-content').style.display = 'none';
+  openScreen('static');
+  try {
+    const d = await api('/api/h5/content/' + key);
+    $('static-title').textContent = d.title;
+    $('static-text').textContent = d.text;
+    $('static-loading').style.display = 'none';
+    $('static-content').style.display = 'block';
+  } catch (e) {
+    $('static-loading').textContent = '加载失败: ' + e.message;
+  }
+}
+
+// ── Plans ─────────────
+async function loadPlans() {
+  try {
+    const d = await api('/api/h5/content/plans');
+    let html = '';
+    for (const p of d.plans) {
+      const safeKey = p.key;
+      html += `<div class="feature-card cat-health" style="flex-direction:row; align-items:center; min-height:72px" onclick="showPlan('${safeKey}')">
+        <div style="font-size:28px; margin-right:14px">${p.emoji}</div>
+        <div style="flex:1">
+          <div class="fc-title">${p.name}</div>
+          <div class="sub" style="font-size:12px; margin-top:4px">${p.period} · ${p.desc}</div>
+        </div>
+        <div style="font-size:20px; opacity:.5">›</div>
+      </div>`;
+    }
+    $('plans-list').innerHTML = html;
+    window._plans_data = d.plans;
+  } catch (e) { toast(e.message); }
+}
+function showPlan(key) {
+  const p = (window._plans_data || []).find(x => x.key === key);
+  if (!p) return;
+  $('plan-detail-title').textContent = `${p.emoji} ${p.name}`;
+  $('plan-detail-text').textContent = p.content;
+  openScreen('plan-detail');
+}
+
+// ── Membership ─────────────
+async function loadMembership() {
+  try {
+    const d = await api('/api/h5/content/membership');
+    let html = '';
+    for (const t of d.data.tiers) {
+      html += `<div class="card" style="border: 1px solid ${t.key === 'vip' ? 'rgba(230,193,120,0.4)' : t.key === 'member' ? 'rgba(124,92,255,0.4)' : 'var(--border-soft)'}">
+        <h3 style="font-size: 16px; color:var(--text); text-transform:none; letter-spacing:0">${t.name}</h3>
+        <div class="sub" style="margin-bottom:14px; font-size: 14px">${t.price}</div>`;
+      for (const h of t.highlights) {
+        html += `<div style="padding:6px 0; display:flex; gap:10px"><span>✓</span><span style="flex:1">${h}</span></div>`;
+      }
+      if (t.key !== 'free') {
+        html += `<div style="height:12px"></div><button onclick="toast('请联系 @scorpia2004 开通')">开通 ${t.name}</button>`;
+      }
+      html += '</div>';
+    }
+    $('membership-content').innerHTML = html;
+  } catch (e) { toast(e.message); }
+}
+
+// ── Report ─────────────
+async function loadReport() {
+  $('report-loading').style.display = 'block';
+  $('report-content').innerHTML = '';
+  try {
+    const r = await api('/api/h5/report');
+    let html = `<div class="card">
+      <h3>${r.name} 的成绩单</h3>
+      <div class="info-row"><span class="k">🪙 总积分</span><span class="v">${r.points}</span></div>
+      <div class="info-row"><span class="k">🔥 签到连续</span><span class="v">${r.checkin_streak} 天</span></div>
+      <div class="info-row"><span class="k">❤️ 健康连续</span><span class="v">${r.health_streak} 天</span></div>
+      <div class="info-row"><span class="k">🏋️ 累计训练</span><span class="v">${r.gym_count} 次</span></div>
+      <div class="info-row"><span class="k">🎖️ 解锁成就</span><span class="v">${r.badges_count}</span></div>
+    </div>
+    <div class="card">
+      <h3>本月数据</h3>
+      <div class="info-row"><span class="k">✅ 签到次数</span><span class="v">${r.this_month.checkins}</span></div>
+      <div class="info-row"><span class="k">🏋️ 健身次数</span><span class="v">${r.this_month.gym}</span></div>
+      <div class="info-row"><span class="k">❤️ 健康打卡</span><span class="v">${r.this_month.health}</span></div>
+    </div>
+    <div class="card">
+      <h3>今日 AI 使用</h3>
+      <div class="info-row"><span class="k">💡 调用次数</span><span class="v">${r.today_ai_calls}</span></div>
+    </div>`;
+    $('report-content').innerHTML = html;
+    $('report-loading').style.display = 'none';
+    $('report-content').style.display = 'block';
+  } catch (e) { $('report-loading').textContent = '加载失败: ' + e.message; }
+}
+
+// ── Badges ─────────────
+async function loadBadges() {
+  $('badges-loading').style.display = 'block';
+  $('badges-content').innerHTML = '';
+  try {
+    const d = await api('/api/h5/badges');
+    let html = `<div class="card" style="text-align:center">
+      <h3>解锁进度</h3>
+      <div style="font-size:36px; font-weight:750; background: linear-gradient(135deg, var(--gold), #fbbf24); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin:8px 0">${d.unlocked_count} / ${d.total}</div>
+    </div>
+    <div class="feature-grid">`;
+    for (const b of d.badges) {
+      const opacity = b.unlocked ? '1' : '0.35';
+      html += `<div class="feature-card" style="opacity:${opacity}">
+        <div class="fc-icon" style="background: linear-gradient(135deg, rgba(230,193,120,0.25), rgba(230,193,120,0.08))">${b.emoji}</div>
+        <div class="fc-title">${b.name}</div>
+        <div class="sub" style="font-size:11px; margin-top:4px">${b.desc}</div>
+      </div>`;
+    }
+    html += '</div>';
+    $('badges-content').innerHTML = html;
+    $('badges-loading').style.display = 'none';
+  } catch (e) { $('badges-loading').textContent = '加载失败: ' + e.message; }
+}
+
+// ── Protein calculator ─────────────
+let proteinState = { goal: 'maintain', activity: 'mid' };
+function setProteinGoal(g) {
+  proteinState.goal = g;
+  document.querySelectorAll('#screen-protein .toggle').forEach((grp, i) => {
+    if (i === 0) grp.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.textContent === (g==='lose'?'减脂':g==='gain'?'增肌':'维持')));
+  });
+}
+function setProteinAct(a) {
+  proteinState.activity = a;
+  document.querySelectorAll('#screen-protein .toggle').forEach((grp, i) => {
+    if (i === 1) grp.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.textContent === (a==='low'?'久坐':a==='high'?'高强度':'中等')));
+  });
+}
+async function calcProtein() {
+  const weight = parseFloat($('p-weight').value);
+  if (!weight || weight <= 0) { toast('请输入体重'); return; }
+  try {
+    const r = await api('/api/h5/calc/protein', {
+      method: 'POST',
+      body: JSON.stringify({ weight, goal: proteinState.goal, activity: proteinState.activity })
+    });
+    let html = `🥩 每日需要 ${r.daily_grams}g 蛋白质\n\n`;
+    html += `分配：\n  3餐: ${r.per_meal_3}g/餐\n  4餐: ${r.per_meal_4}g/餐\n\n`;
+    html += `食物来源（任选）：\n`;
+    for (const s of r.sources) html += `  • ${s}\n`;
+    html += `\n💡 ${r.tip}`;
+    $('protein-result').textContent = html;
+    $('protein-result').style.display = 'block';
+  } catch (e) { toast(e.message); }
+}
+
+// ── Calorie calculator ─────────────
+let calState = { gender: 'male', activity: 'mid', goal: 'maintain' };
+function setCalGender(g) { calState.gender = g; _updateToggleGroup('#screen-calorie', 0, g==='male'?'男':'女'); }
+function setCalAct(a) { calState.activity = a; _updateToggleGroup('#screen-calorie', 1, a==='low'?'久坐':a==='high'?'高强度':'中等'); }
+function setCalGoal(g) { calState.goal = g; _updateToggleGroup('#screen-calorie', 2, g==='lose'?'减脂':g==='gain'?'增肌':'维持'); }
+function _updateToggleGroup(sel, idx, label) {
+  const grps = document.querySelectorAll(sel + ' .toggle');
+  if (grps[idx]) grps[idx].querySelectorAll('button').forEach(b => b.classList.toggle('on', b.textContent === label));
+}
+async function calcCalorie() {
+  const weight = parseFloat($('c-weight').value);
+  const height = parseFloat($('c-height').value);
+  const age = parseInt($('c-age').value);
+  if (!weight || !height || !age) { toast('请填写完整'); return; }
+  try {
+    const r = await api('/api/h5/calc/calorie', {
+      method: 'POST',
+      body: JSON.stringify({ weight, height, age, ...calState })
+    });
+    let html = `📊 基础代谢 BMR: ${r.bmr} 大卡\n`;
+    html += `⚡ 日常消耗 TDEE: ${r.tdee} 大卡\n`;
+    html += `🎯 目标摄入: ${r.target} 大卡\n\n`;
+    html += `宏量分配：\n`;
+    html += `  🥩 蛋白: ${r.macros.protein_g}g\n`;
+    html += `  🥑 脂肪: ${r.macros.fat_g}g\n`;
+    html += `  🍚 碳水: ${r.macros.carbs_g}g\n\n`;
+    html += `💡 ${r.tip}`;
+    $('calorie-result').textContent = html;
+    $('calorie-result').style.display = 'block';
+  } catch (e) { toast(e.message); }
+}
+
+// ── Gym Log ─────────────
+let gymState = { workout_type: '全身', intensity: 3 };
+function setGymType(t) {
+  gymState.workout_type = t;
+  document.querySelectorAll('#screen-gym .toggle').forEach((grp, i) => {
+    if (i === 0) grp.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.textContent === t));
+  });
+}
+function setGymIntensity(n) {
+  gymState.intensity = n;
+  document.querySelectorAll('#screen-gym .toggle').forEach((grp, i) => {
+    if (i === 1) grp.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.textContent === String(n)));
+  });
+}
+async function submitGym() {
+  const duration_min = parseInt($('g-duration').value);
+  const notes = $('g-notes').value.trim();
+  if (!duration_min || duration_min <= 0) { toast('请输入时长'); return; }
+  try {
+    const r = await api('/api/h5/gym-log', {
+      method: 'POST',
+      body: JSON.stringify({ ...gymState, duration_min, notes })
+    });
+    if (r.success) {
+      toast(`✅ +${r.points_earned} 积分`);
+      $('st-points').textContent = r.total_points;
+      openScreen('home');
+    } else {
+      toast('今日已打卡');
+    }
+  } catch (e) { toast(e.message); }
+}
+
+// ── Deep Work ─────────────
+let deepWorkDuration = 60;
+function setDeepTime(n) {
+  deepWorkDuration = n;
+  document.querySelectorAll('#screen-deepwork .toggle button').forEach(b => {
+    b.classList.toggle('on', b.textContent.includes(String(n)));
+  });
+}
+async function submitDeepWork() {
+  const task = $('dw-task').value.trim();
+  try {
+    const r = await api('/api/h5/deep-work', {
+      method: 'POST',
+      body: JSON.stringify({ duration_min: deepWorkDuration, task })
+    });
+    toast(`✅ +${r.points_earned} 积分`);
+    if (r.total_points != null) $('st-points').textContent = r.total_points;
+    openScreen('home');
   } catch (e) { toast(e.message); }
 }
 async function submitAI() {

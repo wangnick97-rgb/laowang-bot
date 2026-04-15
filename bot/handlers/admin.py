@@ -79,6 +79,43 @@ async def cmd_members(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("\n".join(lines), parse_mode="Markdown")
 
 
+async def cmd_h5token(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Admin生成H5登录token。用法: /h5token <user_id> 或 /h5token（给自己）"""
+    if not _is_admin(update.effective_user.id):
+        return
+
+    from webapp.h5_auth import generate_h5_token
+    import os
+
+    # 目标用户
+    if context.args:
+        try:
+            target_id = int(context.args[0])
+        except ValueError:
+            await update.message.reply_text("❌ user_id 必须是数字")
+            return
+    else:
+        target_id = update.effective_user.id
+
+    target = get_user(target_id)
+    if not target:
+        await update.message.reply_text(f"❌ 用户 `{target_id}` 不存在", parse_mode="Markdown")
+        return
+
+    token = generate_h5_token(target_id)
+    base_url = os.getenv("WEBAPP_URL", "https://laowang-toolbox-production.up.railway.app")
+    login_url = f"{base_url}/webapp/h5/index.html#token={token}"
+
+    name = target.get("full_name") or target.get("username") or str(target_id)
+    await update.message.reply_text(
+        f"🔑 *H5登录链接*\n\n"
+        f"用户: {name} (`{target_id}`)\n\n"
+        f"链接（30天有效）:\n`{login_url}`\n\n"
+        f"发给用户，点击即可在微信/浏览器登录",
+        parse_mode="Markdown",
+    )
+
+
 async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not _is_admin(update.effective_user.id):
         return

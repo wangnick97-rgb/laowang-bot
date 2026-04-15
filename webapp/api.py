@@ -291,6 +291,149 @@ async def api_redeem(request: Request, user: dict = Depends(get_current_user)):
     return {"success": True, "remaining_points": new_points, "reward": reward["name"]}
 
 
+# ── H5 网页版 API (非 Telegram, 给微信/浏览器用) ──────────────────────────
+
+from fastapi import Body
+from webapp.h5_auth import generate_h5_token, verify_h5_token, get_h5_user
+from db.users import get_user as _get_user_row
+from db.points import get_points_info as _get_points
+from services.claude_client import call_claude
+from bot.handlers.daily_cognition import _TOPICS as COGNITION_TOPICS
+from datetime import date as _date
+
+
+@app.post("/api/h5/login")
+async def h5_login(payload: dict = Body(...)):
+    """H5 登录：用 token 换取 session cookie。"""
+    token = (payload or {}).get("token", "").strip()
+    if not token:
+        raise HTTPException(status_code=400, detail="缺少 token")
+
+    user_id = verify_h5_token(token)
+    if user_id is None:
+        raise HTTPException(status_code=401, detail="token 无效或已过期")
+
+    user = _get_user_row(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+
+    resp = JSONResponse(content={
+        "ok": True,
+        "user": {
+            "id": user_id,
+            "name": user.get("full_name") or user.get("username") or str(user_id),
+            "membership_status": user.get("membership_status", "free"),
+            "membership_tier": user.get("membership_tier", "free"),
+        },
+    })
+    resp.set_cookie(
+        "h5_token", token,
+        max_age=30 * 24 * 3600,
+        httponly=True, secure=True, samesite="lax",
+    )
+    return resp
+
+
+@app.post("/api/h5/logout")
+async def h5_logout():
+    resp = JSONResponse(content={"ok": True})
+    resp.delete_cookie("h5_token")
+    return resp
+
+
+@app.get("/api/h5/me")
+async def h5_me(user: dict = Depends(get_h5_user)):
+    """H5 用户 Dashboard。"""
+    user_id = user["id"]
+    db = get_client()
+    row = db.table("users").select(
+        "points, checkin_streak, health_streak, gym_count, badges, "
+        "membership_status, membership_tier, membership_expires_at, "
+        "full_name, username"
+    ).eq("id", user_id).maybe_single().execute()
+
+    if not row or not row.data:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    u = row.data
+
+    # rank
+    all_users = db.table("users").select("id").eq("is_active", True).gt("points", 0).order("points", desc=True).execute()
+    rank = 0
+    for i, r in enumerate(all_users.data or []):
+        if r["id"] == user_id:
+            rank = i + 1
+            break
+
+    return {
+        "id": user_id,
+        "name": u.get("full_name") or u.get("username") or str(user_id),
+        "points": u.get("points", 0) or 0,
+        "checkin_streak": u.get("checkin_streak", 0) or 0,
+        "health_streak": u.get("health_streak", 0) or 0,
+        "gym_count": u.get("gym_count", 0) or 0,
+        "badges": u.get("badges") or [],
+        "membership_status": u.get("membership_status", "free"),
+        "membership_tier": u.get("membership_tier", "free"),
+        "membership_expires_at": u.get("membership_expires_at"),
+        "rank": rank,
+    }
+
+
+@app.get("/api/h5/cognition/today")
+async def h5_cognition_today(user: dict = Depends(get_h5_user)):
+    """获取今日认知话题。"""
+    user_id = user["id"]
+    idx = (user_id + _date.today().toordinal()) % len(COGNITION_TOPICS)
+    t = COGNITION_TOPICS[idx]
+    return {
+        "title": t["title"],
+        "desc": t["desc"],
+        "question": t["question"],
+    }
+
+
+@app.post("/api/h5/cognition/submit")
+async def h5_cognition_submit(
+    payload: dict = Body(...),
+    user: dict = Depends(get_h5_user),
+):
+    """提交认知训练回答，调用 Claude 点评。"""
+    user_id = user["id"]
+    reflection = (payload or {}).get("reflection", "").strip()
+    if len(reflection) < 5:
+        raise HTTPException(status_code=400, detail="回答太短了，至少写几句话")
+
+    idx = (user_id + _date.today().toordinal()) % len(COGNITION_TOPICS)
+    t = COGNITION_TOPICS[idx]
+
+    user_input = (
+        f"今日认知话题：{t['title']}\n"
+        f"话题说明：{t['desc']}\n"
+        f"思考题：{t['question']}\n\n"
+        f"用户回答：{reflection}"
+    )
+
+    try:
+        result = await call_claude("daily_cognition", user_input, user_id=user_id, max_tokens=600)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI 处理失败: {str(e)[:100]}")
+
+    # +5 积分
+    try:
+        db = get_client()
+        urow = db.table("users").select("points").eq("id", user_id).maybe_single().execute()
+        new_points = ((urow.data or {}).get("points", 0) or 0) + 5
+        db.table("users").update({"points": new_points}).eq("id", user_id).execute()
+    except Exception:
+        new_points = None
+
+    return {
+        "feedback": result,
+        "points_earned": 5,
+        "total_points": new_points,
+    }
+
+
 # ── Health check ─────────────────────────────────────────────────────────────
 
 @app.get("/health")

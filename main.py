@@ -67,7 +67,7 @@ from bot.handlers.points_shop import cmd_points, callback_redeem
 from bot.handlers.consultation import build_handler as consult_handler
 from bot.handlers.referral import cmd_invite
 from bot.handlers.join import callback_join
-from bot.handlers.admin import cmd_addmember, cmd_removemember, cmd_members, cmd_stats
+from bot.handlers.admin import cmd_addmember, cmd_removemember, cmd_members, cmd_stats, cmd_h5token
 from bot.handlers.member_center import show_streaks, show_membership_info, callback_invite_redirect
 from bot.handlers.activation import cmd_gencode, cmd_activate, cmd_codes
 from bot.handlers.group_chat import track_group_message, cmd_groupstats, cmd_mychat
@@ -168,6 +168,7 @@ def build_app() -> Application:
     app.add_handler(CommandHandler("signal", cmd_signal))
     app.add_handler(CommandHandler("groupstats", cmd_groupstats))
     app.add_handler(CommandHandler("mychat", cmd_mychat))
+    app.add_handler(CommandHandler("h5token", cmd_h5token))
 
     # ── ConversationHandlers (before generic CallbackQueryHandlers) ────────
     # 创业财富

@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>老王工具箱</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background: #0b0f1c;
+  color: #e6e9f2;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  font-size: 15px;
+  line-height: 1.5;
+}
+body { padding-bottom: env(safe-area-inset-bottom); }
+
+/* ── 通用组件 ───────────────── */
+.screen { display: none; padding: 16px; padding-top: max(16px, env(safe-area-inset-top)); min-height: 100vh; }
+.screen.active { display: block; }
+.card {
+  background: linear-gradient(135deg, #1a2138 0%, #161c2e 100%);
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.card h3 { font-size: 13px; opacity: .6; margin-bottom: 10px; font-weight: 500; letter-spacing: .5px; text-transform: uppercase; }
+h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+h2 { font-size: 18px; font-weight: 600; margin-bottom: 12px; }
+.sub { opacity: .6; font-size: 13px; }
+button, .btn {
+  border: none; outline: none; background: #5865f2; color: #fff;
+  padding: 14px 20px; border-radius: 12px; font-size: 15px; font-weight: 600;
+  width: 100%; cursor: pointer; transition: transform .1s, opacity .1s;
+}
+button:active { transform: scale(.97); opacity: .85; }
+button.secondary { background: rgba(255,255,255,0.08); }
+button.ghost { background: transparent; border: 1px solid rgba(255,255,255,0.15); }
+input, textarea {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 14px; color: #e6e9f2; width: 100%;
+  font-size: 15px; font-family: inherit; outline: none;
+}
+input:focus, textarea:focus { border-color: #5865f2; }
+textarea { resize: none; min-height: 120px; }
+
+/* ── 登录页 ───────────────── */
+#screen-login { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px 24px; }
+.logo { font-size: 48px; margin-bottom: 12px; }
+#screen-login h1 { text-align: center; font-size: 26px; margin-bottom: 8px; }
+#screen-login .sub { text-align: center; margin-bottom: 32px; }
+.login-box { width: 100%; max-width: 360px; }
+.login-box .error { color: #ff6b6b; font-size: 13px; margin-top: 10px; text-align: center; min-height: 18px; }
+
+/* ── Dashboard ───────────────── */
+.greeting { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+.greeting .name { font-size: 20px; font-weight: 700; }
+.tier-badge {
+  padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+}
+.tier-badge.free { background: rgba(255,255,255,.1); color: #999; }
+.tier-badge.member { background: linear-gradient(135deg, #5865f2, #7289da); color: #fff; }
+.tier-badge.vip { background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; }
+
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.stat-tile { background: linear-gradient(135deg, #1a2138 0%, #161c2e 100%); border-radius: 14px; padding: 16px 10px; text-align: center; border: 1px solid rgba(255,255,255,0.06); }
+.stat-tile .num { font-size: 22px; font-weight: 700; background: linear-gradient(135deg, #64b5f6, #9c27b0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.stat-tile .label { font-size: 11px; opacity: .55; margin-top: 4px; }
+
+/* ── 功能菜单 ───────────────── */
+.section-title { font-size: 14px; opacity: .55; font-weight: 600; margin: 18px 4px 10px; }
+.feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.feature-card {
+  background: linear-gradient(135deg, #1a2138 0%, #161c2e 100%);
+  border-radius: 14px; padding: 18px 14px;
+  border: 1px solid rgba(255,255,255,0.06);
+  cursor: pointer;
+  display: flex; flex-direction: column; gap: 8px;
+  min-height: 90px;
+}
+.feature-card:active { opacity: .85; }
+.feature-card .emoji { font-size: 26px; }
+.feature-card .title { font-size: 14px; font-weight: 600; }
+.feature-card .desc { font-size: 11px; opacity: .5; }
+
+/* ── 认知训练 ───────────────── */
+.topic-box {
+  background: linear-gradient(135deg, rgba(88,101,242,.15), rgba(156,39,176,.1));
+  border: 1px solid rgba(88,101,242,.3);
+  border-radius: 16px; padding: 18px; margin-bottom: 14px;
+}
+.topic-box .title { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+.topic-box .desc { font-size: 13px; opacity: .8; margin-bottom: 14px; line-height: 1.6; }
+.topic-box .question { font-size: 14px; font-weight: 600; color: #64b5f6; background: rgba(0,0,0,.2); padding: 12px; border-radius: 10px; line-height: 1.6; }
+
+.feedback-box {
+  background: rgba(100, 181, 246, .08);
+  border-left: 3px solid #64b5f6;
+  border-radius: 10px; padding: 16px;
+  white-space: pre-wrap; line-height: 1.7; font-size: 14px;
+  margin-top: 14px;
+}
+.points-earned {
+  display: inline-block; padding: 6px 14px; background: linear-gradient(135deg, #ffd700, #ff8c00);
+  color: #000; border-radius: 20px; font-weight: 700; font-size: 13px; margin-top: 12px;
+}
+
+/* ── Header / Nav ───────────────── */
+.nav-top { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding-top: 4px; }
+.nav-top .back { font-size: 22px; cursor: pointer; padding: 4px 8px; }
+.nav-top .title { font-size: 17px; font-weight: 600; }
+
+.loading { text-align: center; padding: 40px 20px; opacity: .6; }
+.loading::after { content: "..."; animation: dots 1.2s steps(3) infinite; }
+@keyframes dots { 0% { content: "."; } 33% { content: ".."; } 66% { content: "..."; } }
+
+.toast {
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.85); color: #fff; padding: 10px 18px; border-radius: 20px;
+  font-size: 13px; z-index: 1000;
+  opacity: 0; transition: opacity .2s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+/* 隐藏滚动条美化 */
+::-webkit-scrollbar { width: 0; }
+</style>
+</head>
+<body>
+
+<!-- ── 登录页 ───────────────── -->
+<div id="screen-login" class="screen">
+  <div class="logo">🧰</div>
+  <h1>老王工具箱</h1>
+  <p class="sub">赚钱 · 健身 · 成长，一个工具箱搞定</p>
+  <div class="login-box">
+    <input id="token-input" placeholder="粘贴你的登录 token" autocomplete="off" />
+    <div style="height:12px"></div>
+    <button id="btn-login">登录</button>
+    <div class="error" id="login-error"></div>
+    <p class="sub" style="margin-top:20px; text-align:center; font-size:12px">
+      没有 token？联系 @scorpia2004 获取
+    </p>
+  </div>
+</div>
+
+<!-- ── 主页 Dashboard ───────────────── -->
+<div id="screen-home" class="screen">
+  <div class="greeting">
+    <div>
+      <div class="sub">欢迎回来</div>
+      <div class="name" id="user-name">-</div>
+    </div>
+    <div class="tier-badge" id="tier-badge">FREE</div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-tile"><div class="num" id="st-points">0</div><div class="label">积分</div></div>
+    <div class="stat-tile"><div class="num" id="st-streak">0</div><div class="label">签到连续</div></div>
+    <div class="stat-tile"><div class="num" id="st-rank">-</div><div class="label">排名</div></div>
+  </div>
+
+  <div class="section-title">💡 个人成长</div>
+  <div class="feature-grid">
+    <div class="feature-card" onclick="openScreen('cognition')">
+      <div class="emoji">💡</div>
+      <div class="title">今日认知</div>
+      <div class="desc">每天一个思维模型 +5分</div>
+    </div>
+    <div class="feature-card" onclick="toast('敬请期待')">
+      <div class="emoji">📝</div>
+      <div class="title">今日英语</div>
+      <div class="desc">即将上线</div>
+    </div>
+    <div class="feature-card" onclick="toast('敬请期待')">
+      <div class="emoji">🌙</div>
+      <div class="title">晚间复盘</div>
+      <div class="desc">即将上线</div>
+    </div>
+    <div class="feature-card" onclick="toast('敬请期待')">
+      <div class="emoji">📋</div>
+      <div class="title">今日计划</div>
+      <div class="desc">即将上线</div>
+    </div>
+  </div>
+
+  <div class="section-title">💪 个人健康</div>
+  <div class="feature-grid">
+    <div class="feature-card" onclick="toast('敬请期待')">
+      <div class="emoji">🏋️</div>
+      <div class="title">今日训练</div>
+      <div class="desc">即将上线</div>
+    </div>
+    <div class="feature-card" onclick="toast('敬请期待')">
+      <div class="emoji">🍽️</div>
+      <div class="title">今日食谱</div>
+      <div class="desc">即将上线</div>
+    </div>
+  </div>
+
+  <div class="section-title">💰 创业财富</div>
+  <div class="feature-grid">
+    <div class="feature-card" onclick="toast('敬请期待')">
+      <div class="emoji">📰</div>
+      <div class="title">今日简报</div>
+      <div class="desc">即将上线</div>
+    </div>
+    <div class="feature-card" onclick="toast('敬请期待')">
+      <div class="emoji">🔥</div>
+      <div class="title">爆款选题</div>
+      <div class="desc">即将上线</div>
+    </div>
+  </div>
+
+  <div style="height:24px"></div>
+  <button class="ghost" onclick="logout()">退出登录</button>
+  <div style="height:20px"></div>
+</div>
+
+<!-- ── 认知训练页 ───────────────── -->
+<div id="screen-cognition" class="screen">
+  <div class="nav-top">
+    <div class="back" onclick="openScreen('home')">←</div>
+    <div class="title">💡 今日认知训练</div>
+  </div>
+
+  <div id="cognition-loading" class="loading">加载今日话题</div>
+
+  <div id="cognition-content" style="display:none">
+    <div class="topic-box">
+      <div class="title" id="cog-title">-</div>
+      <div class="desc" id="cog-desc">-</div>
+      <div class="question" id="cog-question">-</div>
+    </div>
+
+    <h3 style="font-size:14px; margin-bottom:8px; opacity:.7">你的思考</h3>
+    <textarea id="reflection-input" placeholder="写下你的想法，至少几句话，老王会给你点评..."></textarea>
+    <div style="height:12px"></div>
+    <button id="btn-submit-cog">提交并获取反馈</button>
+
+    <div id="feedback-wrap" style="display:none">
+      <div class="feedback-box" id="feedback-text"></div>
+      <div class="points-earned">🪙 +5 积分</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ─────────────────────
+const STORAGE_KEY = 'laowang_h5_token';
+let currentUser = null;
+
+// ── Helpers ───────────────────
+function $(id) { return document.getElementById(id); }
+function openScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $('screen-' + name).classList.add('active');
+  window.scrollTo(0, 0);
+
+  if (name === 'cognition') loadCognition();
+}
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+async function api(path, opts={}) {
+  const token = localStorage.getItem(STORAGE_KEY);
+  opts.headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
+  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
+  const r = await fetch(path, opts);
+  if (r.status === 401) {
+    localStorage.removeItem(STORAGE_KEY);
+    openScreen('login');
+    throw new Error('需要登录');
+  }
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.detail || '请求失败');
+  return data;
+}
+
+// ── Login ─────────────────────
+async function login(token) {
+  $('login-error').textContent = '';
+  try {
+    const res = await fetch('/api/h5/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || '登录失败');
+    localStorage.setItem(STORAGE_KEY, token);
+    currentUser = data.user;
+    await loadDashboard();
+    openScreen('home');
+  } catch (e) {
+    $('login-error').textContent = e.message;
+  }
+}
+
+function logout() {
+  localStorage.removeItem(STORAGE_KEY);
+  fetch('/api/h5/logout', { method: 'POST' });
+  currentUser = null;
+  openScreen('login');
+}
+
+// ── Dashboard ─────────────────
+async function loadDashboard() {
+  try {
+    const me = await api('/api/h5/me');
+    $('user-name').textContent = me.name;
+    $('st-points').textContent = me.points;
+    $('st-streak').textContent = me.checkin_streak;
+    $('st-rank').textContent = me.rank || '-';
+    const tier = me.membership_tier || 'free';
+    const badge = $('tier-badge');
+    badge.className = 'tier-badge ' + tier;
+    badge.textContent = tier === 'vip' ? 'VIP' : tier === 'member' ? '会员' : 'FREE';
+  } catch (e) {
+    toast(e.message);
+  }
+}
+
+// ── Cognition ─────────────────
+async function loadCognition() {
+  $('cognition-loading').style.display = 'block';
+  $('cognition-content').style.display = 'none';
+  $('feedback-wrap').style.display = 'none';
+  $('reflection-input').value = '';
+
+  try {
+    const t = await api('/api/h5/cognition/today');
+    $('cog-title').textContent = t.title;
+    $('cog-desc').textContent = t.desc;
+    $('cog-question').textContent = t.question;
+    $('cognition-loading').style.display = 'none';
+    $('cognition-content').style.display = 'block';
+  } catch (e) {
+    $('cognition-loading').textContent = '加载失败：' + e.message;
+  }
+}
+
+async function submitCognition() {
+  const reflection = $('reflection-input').value.trim();
+  if (reflection.length < 5) { toast('至少写几句话'); return; }
+
+  const btn = $('btn-submit-cog');
+  btn.disabled = true; btn.textContent = '老王正在思考...';
+
+  try {
+    const res = await api('/api/h5/cognition/submit', {
+      method: 'POST',
+      body: JSON.stringify({ reflection })
+    });
+    $('feedback-text').textContent = res.feedback;
+    $('feedback-wrap').style.display = 'block';
+    btn.style.display = 'none';
+    if (res.total_points != null) $('st-points').textContent = res.total_points;
+  } catch (e) {
+    toast(e.message);
+    btn.disabled = false; btn.textContent = '提交并获取反馈';
+  }
+}
+
+// ── Init ──────────────────────
+$('btn-login').addEventListener('click', () => {
+  const t = $('token-input').value.trim();
+  if (!t) { $('login-error').textContent = '请粘贴 token'; return; }
+  login(t);
+});
+$('btn-submit-cog').addEventListener('click', submitCognition);
+$('token-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') $('btn-login').click(); });
+
+// 检查 URL hash 中是否有 token（从 Bot 发来的登录链接）
+(async function init() {
+  const hash = window.location.hash || '';
+  const match = hash.match(/token=([^&]+)/);
+  if (match) {
+    const token = decodeURIComponent(match[1]);
+    history.replaceState(null, '', window.location.pathname);
+    await login(token);
+    return;
+  }
+  // 已登录
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      await loadDashboard();
+      openScreen('home');
+      return;
+    } catch (e) {}
+  }
+  openScreen('login');
+})();
+</script>
+</body>
+</html>

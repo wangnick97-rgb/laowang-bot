@@ -688,9 +688,9 @@ textarea { resize: none; min-height: 140px; line-height: 1.6; }
       <div class="qa-icon">💎</div>
       <div class="qa-label">会员</div>
     </div>
-    <div class="qa-btn" onclick="openScreen('health')">
-      <div class="qa-icon">❤️</div>
-      <div class="qa-label">打卡</div>
+    <div class="qa-btn" onclick="openScreen('consult')">
+      <div class="qa-icon">🎯</div>
+      <div class="qa-label">咨询</div>
     </div>
   </div>
 
@@ -955,6 +955,47 @@ textarea { resize: none; min-height: 140px; line-height: 1.6; }
   <div id="report-content" style="display:none"></div>
 </div>
 
+<!-- ── 1v1 咨询 ───────────── -->
+<div id="screen-consult" class="screen">
+  <div class="nav-top">
+    <div class="back" onclick="openScreen('home')">←</div>
+    <div class="title">🎯 1v1 咨询</div>
+  </div>
+  <div class="card">
+    <p style="font-size:14px; line-height:1.7; color:var(--text-dim)">
+      跟老王来一场高密度、不废话的 1 对 1 通话。<br><br>
+      不是泛泛而谈的建议，而是根据你的具体情况，给你<strong style="color:var(--text)">可以直接执行的方案</strong>。
+    </p>
+  </div>
+  <div class="card">
+    <h3>咨询方向</h3>
+    <div style="font-size:13px; line-height:1.9">
+      📊 <strong>投资策略</strong> — 交易体系 · 风控纪律 · 心态<br>
+      ✍️ <strong>自媒体</strong> — 定位 · 变现路径 · 从0到1<br>
+      🏠 <strong>Airbnb</strong> — 选房 · 定价 · 运营<br>
+      🚀 <strong>创业</strong> — 商业模式 · 冷启动 · 融资
+    </div>
+  </div>
+  <div class="section-title">选择套餐</div>
+  <div id="consult-packages"></div>
+</div>
+
+<!-- ── 咨询确认页 ───────────── -->
+<div id="screen-consult-form" class="screen">
+  <div class="nav-top">
+    <div class="back" onclick="openScreen('consult')">←</div>
+    <div class="title">填写咨询主题</div>
+  </div>
+  <div class="card" id="consult-pkg-info"></div>
+  <div class="card health-form">
+    <label>描述你想咨询的问题 (2-3 句话)</label>
+    <textarea id="consult-topic" placeholder="例如：我想做AI工具类自媒体，不确定怎么定位和变现..."></textarea>
+    <p class="sub" style="font-size:11px; margin-top:8px">老王会在24小时内私信你确认时间</p>
+    <div style="height:14px"></div>
+    <button onclick="submitConsult()">✅ 确认预约</button>
+  </div>
+</div>
+
 <!-- ── 我的成就 ───────────── -->
 <div id="screen-badges" class="screen">
   <div class="nav-top">
@@ -1080,6 +1121,7 @@ function openScreen(name) {
   if (name === 'membership') loadMembership();
   if (name === 'report') loadReport();
   if (name === 'badges') loadBadges();
+  if (name === 'consult') loadConsult();
 }
 function toast(msg) {
   const t = $('toast');
@@ -1624,6 +1666,61 @@ async function submitDeepWork() {
     toast(`✅ +${r.points_earned} 积分`);
     if (r.total_points != null) $('st-points').textContent = r.total_points;
     openScreen('home');
+  } catch (e) { toast(e.message); }
+}
+
+// ── Consultation ─────────────
+let selectedPackage = null;
+async function loadConsult() {
+  $('consult-packages').innerHTML = '<div class="loading">加载中</div>';
+  try {
+    const d = await api('/api/h5/consult/packages');
+    let html = '';
+    for (const p of d.packages) {
+      const tagHtml = p.tag ? `<span style="display:inline-block; padding:3px 10px; background:linear-gradient(135deg,var(--gold),#f59e0b); color:#1a1a1a; border-radius:100px; font-size:10px; font-weight:700; margin-left:8px">${p.tag}</span>` : '';
+      const safeKey = p.key;
+      const safeName = p.name.replace(/'/g, "\\'");
+      html += `<div class="card" style="cursor:pointer; margin-bottom:12px" onclick="selectPackage('${safeKey}','${safeName}','${p.price}','${p.duration}')">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px">
+          <div style="font-size:16px; font-weight:700">${p.name}${tagHtml}</div>
+        </div>
+        <div class="info-row"><span class="k">时长</span><span class="v">${p.duration}</span></div>
+        <div class="info-row"><span class="k">费用</span><span class="v" style="color:var(--gold); font-size:16px">${p.price}</span></div>
+        <p class="sub" style="margin-top:8px; font-size:12px">${p.desc}</p>
+      </div>`;
+    }
+    $('consult-packages').innerHTML = html;
+  } catch (e) {
+    $('consult-packages').innerHTML = `<div class="loading">加载失败: ${e.message}</div>`;
+  }
+}
+
+function selectPackage(key, name, price, duration) {
+  selectedPackage = { key, name, price, duration };
+  $('consult-pkg-info').innerHTML = `
+    <h3>你选择了</h3>
+    <div style="font-size:16px; font-weight:700; margin-bottom:10px">${name}</div>
+    <div class="info-row"><span class="k">时长</span><span class="v">${duration}</span></div>
+    <div class="info-row"><span class="k">费用</span><span class="v" style="color:var(--gold)">${price}</span></div>
+  `;
+  $('consult-topic').value = '';
+  openScreen('consult-form');
+}
+
+async function submitConsult() {
+  if (!selectedPackage) { toast('请先选择套餐'); return; }
+  const topic = $('consult-topic').value.trim();
+  if (topic.length < 5) { toast('至少写几句话'); return; }
+
+  try {
+    const r = await api('/api/h5/consult/book', {
+      method: 'POST',
+      body: JSON.stringify({ package: selectedPackage.key, topic })
+    });
+    if (r.success) {
+      alert(`✅ 预约成功！\n\n${r.package_name} · ${r.price}\n\n老王会在24小时内私信你确认时间。\n\n请关注 Telegram 消息。`);
+      openScreen('home');
+    }
   } catch (e) { toast(e.message); }
 }
 async function submitAI() {

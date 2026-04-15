@@ -1198,6 +1198,83 @@ async def h5_badges(user: dict = Depends(get_h5_user)):
     return {"badges": all_badges, "unlocked_count": len(user_badges), "total": len(all_badges)}
 
 
+@app.get("/api/h5/consult/packages")
+async def h5_consult_packages(user: dict = Depends(get_h5_user)):
+    """咨询套餐列表。"""
+    from bot.handlers.consultation import PACKAGES
+    items = []
+    for key, pkg in PACKAGES.items():
+        items.append({
+            "key": key,
+            "name": pkg["name"],
+            "duration": pkg["duration"],
+            "price": pkg["price"],
+            "desc": pkg["desc"],
+            "tag": pkg.get("tag", ""),
+        })
+    return {"packages": items}
+
+
+@app.post("/api/h5/consult/book")
+async def h5_consult_book(payload: dict = Body(...), user: dict = Depends(get_h5_user)):
+    """提交咨询预约 + 通知管理员。"""
+    from bot.handlers.consultation import PACKAGES
+    from db.users import get_admin_ids
+    from datetime import datetime, timezone
+
+    user_id = user["id"]
+    package_key = (payload or {}).get("package", "")
+    topic = (payload or {}).get("topic", "").strip()
+
+    if package_key not in PACKAGES:
+        raise HTTPException(status_code=400, detail="套餐无效")
+    if len(topic) < 5:
+        raise HTTPException(status_code=400, detail="咨询主题至少5个字")
+    if len(topic) > 1000:
+        raise HTTPException(status_code=400, detail="咨询主题太长了")
+
+    pkg = PACKAGES[package_key]
+    db = get_client()
+
+    try:
+        db.table("consultation_bookings").insert({
+            "user_id": user_id,
+            "package": package_key,
+            "topic": topic,
+            "status": "pending",
+        }).execute()
+    except Exception as e:
+        logger.warning("Failed to save booking: %s", e)
+
+    u = db.table("users").select("full_name, username").eq("id", user_id).maybe_single().execute()
+    u_data = u.data or {}
+    name = u_data.get("full_name") or u_data.get("username") or str(user_id)
+    uname = f"@{u_data.get('username')}" if u_data.get("username") else "无用户名"
+
+    admin_text = (
+        f"🔔 *新咨询预约 (H5)*\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"👤 用户：{name}（{uname}）\n"
+        f"🆔 ID：`{user_id}`\n"
+        f"📦 套餐：{pkg['name']}\n"
+        f"⏱ 时长：{pkg['duration']}\n"
+        f"💰 费用：{pkg['price']}\n\n"
+        f"💬 *咨询主题：*\n_{topic}_\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"📅 {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}"
+    )
+    if _ptb_app:
+        for admin_id in get_admin_ids():
+            try:
+                await _ptb_app.bot.send_message(
+                    chat_id=admin_id, text=admin_text, parse_mode="Markdown",
+                )
+            except Exception as e:
+                logger.warning("Failed to notify admin %s: %s", admin_id, e)
+
+    return {"success": True, "package_name": pkg["name"], "price": pkg["price"]}
+
+
 @app.get("/api/h5/leaderboard")
 async def h5_leaderboard(user: dict = Depends(get_h5_user)):
     """H5 排行榜（需要登录）。"""

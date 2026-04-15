@@ -39,11 +39,29 @@ async def lifespan(app: FastAPI):
     await _ptb_app.initialize()
     await _ptb_app.start()
 
-    # Set webhook
+    # Set webhook — self-heal: delete first to drop any ghost webhook pointing elsewhere
     if BOT_MODE == "webhook" and WEBHOOK_URL:
         webhook_url = f"{WEBHOOK_URL}/{TELEGRAM_BOT_TOKEN}"
-        await _ptb_app.bot.set_webhook(url=webhook_url, allowed_updates=["message", "callback_query", "my_chat_member"])
-        logger.info("Webhook set: %s", webhook_url)
+        try:
+            # Check current webhook and only update if different (avoids thrashing)
+            current = await _ptb_app.bot.get_webhook_info()
+            if current.url != webhook_url:
+                logger.warning("Webhook mismatch: current=%s, expected=%s", current.url, webhook_url)
+                await _ptb_app.bot.delete_webhook(drop_pending_updates=False)
+                await _ptb_app.bot.set_webhook(
+                    url=webhook_url,
+                    allowed_updates=["message", "callback_query", "my_chat_member"],
+                )
+                logger.info("Webhook force-reset to: %s", webhook_url)
+            else:
+                logger.info("Webhook already correct: %s", webhook_url)
+        except Exception as e:
+            logger.error("Failed to set webhook: %s", e)
+            # Fallback: just set it
+            await _ptb_app.bot.set_webhook(
+                url=webhook_url,
+                allowed_updates=["message", "callback_query", "my_chat_member"],
+            )
 
     # Start updater processing (without running its own web server)
     asyncio.create_task(_ptb_app.updater.start_webhook(
@@ -53,6 +71,27 @@ async def lifespan(app: FastAPI):
         webhook_url="",  # Already set above
         drop_pending_updates=False,
     )) if False else None  # Skip updater; we push to update_queue directly
+
+    # Background task: periodically verify webhook is correct (self-heal)
+    async def _webhook_watchdog():
+        while True:
+            try:
+                await asyncio.sleep(300)  # every 5 min
+                if BOT_MODE != "webhook" or not WEBHOOK_URL:
+                    continue
+                expected = f"{WEBHOOK_URL}/{TELEGRAM_BOT_TOKEN}"
+                info = await _ptb_app.bot.get_webhook_info()
+                if info.url != expected:
+                    logger.warning("Watchdog: webhook drifted to %s, resetting", info.url)
+                    await _ptb_app.bot.delete_webhook(drop_pending_updates=False)
+                    await _ptb_app.bot.set_webhook(
+                        url=expected,
+                        allowed_updates=["message", "callback_query", "my_chat_member"],
+                    )
+            except Exception as e:
+                logger.error("webhook watchdog error: %s", e)
+
+    asyncio.create_task(_webhook_watchdog())
 
     logger.info("ptb Application started")
     yield

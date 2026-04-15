@@ -768,6 +768,79 @@ async def h5_health_checkin(
 
 # ── 邀请链接 ─────────────────────────────────────────────────────────────────
 
+@app.get("/api/h5/shop")
+async def h5_shop(user: dict = Depends(get_h5_user)):
+    """H5 积分商城。"""
+    from bot.handlers.points_shop import REWARDS_ALL, REWARDS_FREE, REWARDS_MEMBER, REWARDS_VIP
+    user_id = user["id"]
+    db = get_client()
+
+    row = db.table("users").select("points, membership_tier, membership_status").eq("id", user_id).maybe_single().execute()
+    u = row.data or {}
+    points = u.get("points", 0) or 0
+    tier = u.get("membership_tier", "free")
+    if u.get("membership_status") == "admin":
+        tier = "admin"
+
+    sections = []
+    sections.append({"title": "🔧 通用道具", "items": REWARDS_ALL})
+    sections.append({"title": "🎁 好物兑换", "items": REWARDS_FREE})
+    if tier in ("member", "vip", "admin"):
+        sections.append({"title": "💎 会员专区", "items": REWARDS_MEMBER})
+    if tier in ("vip", "admin"):
+        sections.append({"title": "👑 私董会专区", "items": REWARDS_VIP})
+
+    return {"points": points, "tier": tier, "sections": sections}
+
+
+@app.post("/api/h5/redeem")
+async def h5_redeem(payload: dict = Body(...), user: dict = Depends(get_h5_user)):
+    """H5 积分兑换。"""
+    from bot.handlers.points_shop import ALL_REWARDS, _can_access
+    from db.points import redeem_points
+    reward_id = (payload or {}).get("id", "")
+    user_id = user["id"]
+
+    reward = next((r for r in ALL_REWARDS if r["id"] == reward_id), None)
+    if not reward:
+        raise HTTPException(status_code=400, detail="商品不存在")
+
+    db = get_client()
+    row = db.table("users").select("membership_tier, membership_status").eq("id", user_id).maybe_single().execute()
+    u = row.data or {}
+    tier = u.get("membership_tier", "free")
+    if u.get("membership_status") == "admin":
+        tier = "admin"
+
+    if not _can_access(tier, reward["tier"]):
+        raise HTTPException(status_code=403, detail="此商品需要更高会员等级")
+
+    success = redeem_points(user_id, reward["cost"], reward["name"])
+    if not success:
+        raise HTTPException(status_code=400, detail="积分不足")
+
+    info = db.table("users").select("points").eq("id", user_id).maybe_single().execute()
+    new_points = (info.data or {}).get("points", 0)
+
+    return {"success": True, "remaining_points": new_points, "reward": reward["name"]}
+
+
+@app.get("/api/h5/leaderboard")
+async def h5_leaderboard(user: dict = Depends(get_h5_user)):
+    """H5 排行榜（需要登录）。"""
+    from db.points import get_leaderboard
+    top = get_leaderboard(10)
+    return [
+        {
+            "rank": i + 1,
+            "name": u.get("full_name") or u.get("username") or str(u["id"]),
+            "points": u.get("points", 0),
+            "checkin_streak": u.get("checkin_streak", 0),
+        }
+        for i, u in enumerate(top)
+    ]
+
+
 @app.get("/api/h5/invite")
 async def h5_invite(user: dict = Depends(get_h5_user)):
     """生成 H5 邀请链接。"""

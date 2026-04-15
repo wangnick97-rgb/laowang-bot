@@ -1103,7 +1103,7 @@ async function loadLeaderboard() {
   $('lb-loading').style.display = 'block';
   $('lb-list').innerHTML = '';
   try {
-    const data = await fetch('/api/leaderboard').then(r => r.json());
+    const data = await api('/api/h5/leaderboard');
     $('lb-loading').style.display = 'none';
     let html = '';
     for (const u of data) {
@@ -1126,7 +1126,7 @@ async function loadShop() {
   $('shop-loading').style.display = 'block';
   $('shop-sections').innerHTML = '';
   try {
-    const data = await api('/api/shop');
+    const data = await api('/api/h5/shop');
     $('shop-points').textContent = data.points;
     $('shop-loading').style.display = 'none';
     let html = '';
@@ -1151,13 +1151,10 @@ async function loadShop() {
 async function redeem(id, name) {
   if (!confirm(`确认兑换：${name}？`)) return;
   try {
-    const res = await fetch('/api/redeem', {
+    const data = await api('/api/h5/redeem', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem(STORAGE_KEY) },
       body: JSON.stringify({ id })
     });
-    const data = await res.json();
-    if (!res.ok) { toast(data.detail || '兑换失败'); return; }
     toast(`兑换成功：${data.reward}`);
     $('shop-points').textContent = data.remaining_points;
     $('st-points').textContent = data.remaining_points;

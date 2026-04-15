@@ -105,7 +105,25 @@ app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None)
 
 # ── Static files (Mini App frontend) ────────────────────────────────────────
 import os
+from fastapi.responses import FileResponse
 _static_dir = os.path.join(os.path.dirname(__file__), "static")
+
+
+# H5 页面禁用缓存（避免用户看不到最新版本）
+@app.get("/webapp/h5/")
+@app.get("/webapp/h5/index.html")
+async def h5_index_no_cache():
+    file_path = os.path.join(_static_dir, "h5", "index.html")
+    return FileResponse(
+        file_path,
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0",
+        },
+    )
+
+
 app.mount("/webapp", StaticFiles(directory=_static_dir, html=True), name="webapp")
 
 

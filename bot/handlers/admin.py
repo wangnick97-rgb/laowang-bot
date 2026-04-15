@@ -104,7 +104,9 @@ async def cmd_h5token(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     token = generate_h5_token(target_id)
     base_url = os.getenv("WEBAPP_URL", "https://laowang-toolbox-production.up.railway.app")
-    login_url = f"{base_url}/webapp/h5/index.html#token={token}"
+    import time
+    v = int(time.time())
+    login_url = f"{base_url}/webapp/h5/index.html?v={v}#token={token}"
 
     name = target.get("full_name") or target.get("username") or str(target_id)
     await update.message.reply_text(

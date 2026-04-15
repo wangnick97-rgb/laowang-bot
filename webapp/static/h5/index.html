@@ -11,29 +11,26 @@
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
 html, body {
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  background: #0b0f1c;
-  color: #e6e9f2;
+  background: #0b0f1c; color: #e6e9f2;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
-  font-size: 15px;
-  line-height: 1.5;
+  font-size: 15px; line-height: 1.5;
 }
 body { padding-bottom: env(safe-area-inset-bottom); }
 
-/* ── 通用组件 ───────────────── */
+/* Screen */
 .screen { display: none; padding: 16px; padding-top: max(16px, env(safe-area-inset-top)); min-height: 100vh; }
 .screen.active { display: block; }
 .card {
   background: linear-gradient(135deg, #1a2138 0%, #161c2e 100%);
-  border-radius: 16px;
-  padding: 18px;
-  margin-bottom: 14px;
+  border-radius: 16px; padding: 18px; margin-bottom: 14px;
   border: 1px solid rgba(255,255,255,0.06);
 }
 .card h3 { font-size: 13px; opacity: .6; margin-bottom: 10px; font-weight: 500; letter-spacing: .5px; text-transform: uppercase; }
 h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
 h2 { font-size: 18px; font-weight: 600; margin-bottom: 12px; }
 .sub { opacity: .6; font-size: 13px; }
+
 button, .btn {
   border: none; outline: none; background: #5865f2; color: #fff;
   padding: 14px 20px; border-radius: 12px; font-size: 15px; font-weight: 600;
@@ -42,7 +39,9 @@ button, .btn {
 button:active { transform: scale(.97); opacity: .85; }
 button.secondary { background: rgba(255,255,255,0.08); }
 button.ghost { background: transparent; border: 1px solid rgba(255,255,255,0.15); }
-input, textarea {
+button:disabled { opacity: .5; }
+
+input, textarea, select {
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 12px;
@@ -50,48 +49,52 @@ input, textarea {
   font-size: 15px; font-family: inherit; outline: none;
 }
 input:focus, textarea:focus { border-color: #5865f2; }
-textarea { resize: none; min-height: 120px; }
+textarea { resize: none; min-height: 140px; }
 
-/* ── 登录页 ───────────────── */
+/* Login */
 #screen-login { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px 24px; }
-.logo { font-size: 48px; margin-bottom: 12px; }
+.logo { font-size: 52px; margin-bottom: 12px; }
 #screen-login h1 { text-align: center; font-size: 26px; margin-bottom: 8px; }
 #screen-login .sub { text-align: center; margin-bottom: 32px; }
 .login-box { width: 100%; max-width: 360px; }
 .login-box .error { color: #ff6b6b; font-size: 13px; margin-top: 10px; text-align: center; min-height: 18px; }
 
-/* ── Dashboard ───────────────── */
+/* Home: greeting */
 .greeting { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
 .greeting .name { font-size: 20px; font-weight: 700; }
-.tier-badge {
-  padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
-}
+.tier-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
 .tier-badge.free { background: rgba(255,255,255,.1); color: #999; }
 .tier-badge.member { background: linear-gradient(135deg, #5865f2, #7289da); color: #fff; }
 .tier-badge.vip { background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; }
+.tier-badge.admin { background: linear-gradient(135deg, #e91e63, #9c27b0); color: #fff; }
 
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
 .stat-tile { background: linear-gradient(135deg, #1a2138 0%, #161c2e 100%); border-radius: 14px; padding: 16px 10px; text-align: center; border: 1px solid rgba(255,255,255,0.06); }
 .stat-tile .num { font-size: 22px; font-weight: 700; background: linear-gradient(135deg, #64b5f6, #9c27b0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 .stat-tile .label { font-size: 11px; opacity: .55; margin-top: 4px; }
 
-/* ── 功能菜单 ───────────────── */
+.quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+.qa-btn { background: linear-gradient(135deg, #5865f2, #7289da); padding: 14px; border-radius: 14px; text-align: center; font-weight: 600; font-size: 14px; cursor: pointer; }
+.qa-btn.alt { background: linear-gradient(135deg, #e91e63, #9c27b0); }
+.qa-btn:active { opacity: .85; }
+.qa-btn .emoji { display: block; font-size: 22px; margin-bottom: 4px; }
+
 .section-title { font-size: 14px; opacity: .55; font-weight: 600; margin: 18px 4px 10px; }
 .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .feature-card {
   background: linear-gradient(135deg, #1a2138 0%, #161c2e 100%);
-  border-radius: 14px; padding: 18px 14px;
+  border-radius: 14px; padding: 16px 14px;
   border: 1px solid rgba(255,255,255,0.06);
   cursor: pointer;
-  display: flex; flex-direction: column; gap: 8px;
-  min-height: 90px;
+  display: flex; flex-direction: column; gap: 6px;
+  min-height: 88px;
 }
 .feature-card:active { opacity: .85; }
-.feature-card .emoji { font-size: 26px; }
+.feature-card .emoji { font-size: 24px; }
 .feature-card .title { font-size: 14px; font-weight: 600; }
-.feature-card .desc { font-size: 11px; opacity: .5; }
+.feature-card .points { font-size: 10px; color: #ffd700; }
 
-/* ── 认知训练 ───────────────── */
+/* Generic AI feature page */
 .topic-box {
   background: linear-gradient(135deg, rgba(88,101,242,.15), rgba(156,39,176,.1));
   border: 1px solid rgba(88,101,242,.3);
@@ -109,14 +112,45 @@ textarea { resize: none; min-height: 120px; }
   margin-top: 14px;
 }
 .points-earned {
-  display: inline-block; padding: 6px 14px; background: linear-gradient(135deg, #ffd700, #ff8c00);
+  display: inline-block; padding: 6px 14px;
+  background: linear-gradient(135deg, #ffd700, #ff8c00);
   color: #000; border-radius: 20px; font-weight: 700; font-size: 13px; margin-top: 12px;
 }
 
-/* ── Header / Nav ───────────────── */
+/* Leaderboard */
+.lb-row { display: flex; align-items: center; padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,.05); }
+.lb-row:last-child { border-bottom: none; }
+.lb-rank { font-size: 16px; font-weight: 700; width: 40px; opacity: .7; }
+.lb-rank.top1 { color: #ffd700; }
+.lb-rank.top2 { color: #c0c0c0; }
+.lb-rank.top3 { color: #cd7f32; }
+.lb-name { flex: 1; font-size: 14px; }
+.lb-points { font-size: 14px; font-weight: 700; color: #64b5f6; }
+
+/* Shop */
+.shop-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px; background: rgba(255,255,255,.03); border-radius: 12px; margin-bottom: 10px;
+  border: 1px solid rgba(255,255,255,.05);
+}
+.shop-item .info .name { font-size: 14px; font-weight: 600; }
+.shop-item .info .cost { font-size: 12px; opacity: .6; margin-top: 4px; }
+.shop-item .btn-small { width: auto; padding: 8px 14px; font-size: 12px; }
+
+/* Health checkin */
+.health-form label { display: block; font-size: 13px; opacity: .7; margin: 14px 0 6px; }
+.health-form .toggle { display: flex; gap: 10px; }
+.health-form .toggle button { flex: 1; background: rgba(255,255,255,.06); }
+.health-form .toggle button.on { background: #5865f2; }
+
+/* Invite */
+.invite-box { padding: 14px; background: rgba(88,101,242,.1); border-radius: 12px; margin-bottom: 12px; }
+.invite-box .link-text { font-size: 12px; word-break: break-all; background: rgba(0,0,0,.3); padding: 10px; border-radius: 8px; margin: 10px 0; font-family: monospace; }
+
+/* Nav */
 .nav-top { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding-top: 4px; }
 .nav-top .back { font-size: 22px; cursor: pointer; padding: 4px 8px; }
-.nav-top .title { font-size: 17px; font-weight: 600; }
+.nav-top .title { font-size: 17px; font-weight: 600; flex: 1; }
 
 .loading { text-align: center; padding: 40px 20px; opacity: .6; }
 .loading::after { content: "..."; animation: dots 1.2s steps(3) infinite; }
@@ -126,18 +160,16 @@ textarea { resize: none; min-height: 120px; }
   position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
   background: rgba(0,0,0,0.85); color: #fff; padding: 10px 18px; border-radius: 20px;
   font-size: 13px; z-index: 1000;
-  opacity: 0; transition: opacity .2s;
-  pointer-events: none;
+  opacity: 0; transition: opacity .2s; pointer-events: none;
 }
 .toast.show { opacity: 1; }
 
-/* 隐藏滚动条美化 */
 ::-webkit-scrollbar { width: 0; }
 </style>
 </head>
 <body>
 
-<!-- ── 登录页 ───────────────── -->
+<!-- ── Login ───────────────── -->
 <div id="screen-login" class="screen">
   <div class="logo">🧰</div>
   <h1>老王工具箱</h1>
@@ -153,7 +185,7 @@ textarea { resize: none; min-height: 120px; }
   </div>
 </div>
 
-<!-- ── 主页 Dashboard ───────────────── -->
+<!-- ── Home ───────────────── -->
 <div id="screen-home" class="screen">
   <div class="greeting">
     <div>
@@ -169,99 +201,174 @@ textarea { resize: none; min-height: 120px; }
     <div class="stat-tile"><div class="num" id="st-rank">-</div><div class="label">排名</div></div>
   </div>
 
-  <div class="section-title">💡 个人成长</div>
-  <div class="feature-grid">
-    <div class="feature-card" onclick="openScreen('cognition')">
-      <div class="emoji">💡</div>
-      <div class="title">今日认知</div>
-      <div class="desc">每天一个思维模型 +5分</div>
+  <div class="quick-actions">
+    <div class="qa-btn" onclick="doCheckin()">
+      <span class="emoji">✅</span>每日签到
     </div>
-    <div class="feature-card" onclick="toast('敬请期待')">
-      <div class="emoji">📝</div>
-      <div class="title">今日英语</div>
-      <div class="desc">即将上线</div>
+    <div class="qa-btn alt" onclick="openScreen('shop')">
+      <span class="emoji">🛍️</span>积分商城
     </div>
-    <div class="feature-card" onclick="toast('敬请期待')">
-      <div class="emoji">🌙</div>
-      <div class="title">晚间复盘</div>
-      <div class="desc">即将上线</div>
+    <div class="qa-btn" onclick="openScreen('leaderboard')">
+      <span class="emoji">🏆</span>排行榜
     </div>
-    <div class="feature-card" onclick="toast('敬请期待')">
-      <div class="emoji">📋</div>
-      <div class="title">今日计划</div>
-      <div class="desc">即将上线</div>
+    <div class="qa-btn alt" onclick="openScreen('invite')">
+      <span class="emoji">🎁</span>邀请好友
     </div>
   </div>
 
-  <div class="section-title">💪 个人健康</div>
-  <div class="feature-grid">
-    <div class="feature-card" onclick="toast('敬请期待')">
-      <div class="emoji">🏋️</div>
-      <div class="title">今日训练</div>
-      <div class="desc">即将上线</div>
-    </div>
-    <div class="feature-card" onclick="toast('敬请期待')">
-      <div class="emoji">🍽️</div>
-      <div class="title">今日食谱</div>
-      <div class="desc">即将上线</div>
-    </div>
-  </div>
-
-  <div class="section-title">💰 创业财富</div>
-  <div class="feature-grid">
-    <div class="feature-card" onclick="toast('敬请期待')">
-      <div class="emoji">📰</div>
-      <div class="title">今日简报</div>
-      <div class="desc">即将上线</div>
-    </div>
-    <div class="feature-card" onclick="toast('敬请期待')">
-      <div class="emoji">🔥</div>
-      <div class="title">爆款选题</div>
-      <div class="desc">即将上线</div>
-    </div>
-  </div>
+  <div id="features-container"></div>
 
   <div style="height:24px"></div>
   <button class="ghost" onclick="logout()">退出登录</button>
   <div style="height:20px"></div>
 </div>
 
-<!-- ── 认知训练页 ───────────────── -->
+<!-- ── Daily Cognition (special page) ───────────── -->
 <div id="screen-cognition" class="screen">
   <div class="nav-top">
     <div class="back" onclick="openScreen('home')">←</div>
     <div class="title">💡 今日认知训练</div>
   </div>
-
-  <div id="cognition-loading" class="loading">加载今日话题</div>
-
-  <div id="cognition-content" style="display:none">
+  <div id="cog-loading" class="loading">加载今日话题</div>
+  <div id="cog-content" style="display:none">
     <div class="topic-box">
       <div class="title" id="cog-title">-</div>
       <div class="desc" id="cog-desc">-</div>
       <div class="question" id="cog-question">-</div>
     </div>
-
     <h3 style="font-size:14px; margin-bottom:8px; opacity:.7">你的思考</h3>
-    <textarea id="reflection-input" placeholder="写下你的想法，至少几句话，老王会给你点评..."></textarea>
+    <textarea id="cog-input" placeholder="写下你的想法，至少几句话..."></textarea>
     <div style="height:12px"></div>
-    <button id="btn-submit-cog">提交并获取反馈</button>
-
-    <div id="feedback-wrap" style="display:none">
-      <div class="feedback-box" id="feedback-text"></div>
+    <button id="btn-cog-submit">提交并获取反馈</button>
+    <div id="cog-feedback-wrap" style="display:none">
+      <div class="feedback-box" id="cog-feedback"></div>
       <div class="points-earned">🪙 +5 积分</div>
     </div>
+  </div>
+</div>
+
+<!-- ── Generic AI Feature Page ───────────── -->
+<div id="screen-ai" class="screen">
+  <div class="nav-top">
+    <div class="back" onclick="openScreen('home')">←</div>
+    <div class="title" id="ai-title">-</div>
+  </div>
+  <div id="ai-loading" class="loading" style="display:none">老王正在思考</div>
+  <div id="ai-form">
+    <div class="card" style="margin-bottom:12px;">
+      <h3 id="ai-label">-</h3>
+      <textarea id="ai-input" placeholder=""></textarea>
+    </div>
+    <button id="btn-ai-submit">提交给老王</button>
+  </div>
+  <div id="ai-result-wrap" style="display:none">
+    <div class="feedback-box" id="ai-result"></div>
+    <div id="ai-points-wrap" style="display:none">
+      <div class="points-earned" id="ai-points">🪙 +0 积分</div>
+    </div>
+    <div style="height:14px"></div>
+    <button class="secondary" onclick="resetAI()">再来一次</button>
+  </div>
+</div>
+
+<!-- ── News Brief ───────────── -->
+<div id="screen-news" class="screen">
+  <div class="nav-top">
+    <div class="back" onclick="openScreen('home')">←</div>
+    <div class="title">📰 今日财经简报</div>
+  </div>
+  <div id="news-loading" class="loading">加载今日简报</div>
+  <div id="news-content" style="display:none">
+    <div class="feedback-box" id="news-result"></div>
+  </div>
+</div>
+
+<!-- ── Leaderboard ───────────── -->
+<div id="screen-leaderboard" class="screen">
+  <div class="nav-top">
+    <div class="back" onclick="openScreen('home')">←</div>
+    <div class="title">🏆 排行榜 · Top 10</div>
+  </div>
+  <div id="lb-loading" class="loading">加载中</div>
+  <div id="lb-list" class="card" style="padding:6px" ></div>
+</div>
+
+<!-- ── Shop ───────────── -->
+<div id="screen-shop" class="screen">
+  <div class="nav-top">
+    <div class="back" onclick="openScreen('home')">←</div>
+    <div class="title">🛍️ 积分商城</div>
+  </div>
+  <div style="text-align:center; padding: 14px; background: linear-gradient(135deg, rgba(255,215,0,.15), rgba(255,140,0,.1)); border-radius: 12px; margin-bottom: 14px;">
+    <div style="font-size:24px; font-weight:700; color:#ffd700" id="shop-points">-</div>
+    <div class="sub">当前积分</div>
+  </div>
+  <div id="shop-loading" class="loading">加载商品</div>
+  <div id="shop-sections"></div>
+</div>
+
+<!-- ── Invite ───────────── -->
+<div id="screen-invite" class="screen">
+  <div class="nav-top">
+    <div class="back" onclick="openScreen('home')">←</div>
+    <div class="title">🎁 邀请好友</div>
+  </div>
+  <div id="invite-loading" class="loading">加载中</div>
+  <div id="invite-content" style="display:none">
+    <div class="card">
+      <h3>你的专属邀请链接</h3>
+      <div class="invite-box">
+        <div class="link-text" id="invite-link">-</div>
+        <button onclick="copyInvite()">复制链接</button>
+      </div>
+      <div style="margin-top:14px">
+        <div class="sub">你的身份：<span id="invite-tier">-</span></div>
+        <div class="sub">已邀请：<span id="invite-count">0</span> 人</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>邀请奖励规则</h3>
+      <div style="font-size:13px; line-height:1.8; opacity:.85">
+        🆓 免费用户：双方各 10 积分<br>
+        💎 会员：邀请人 100 / 新人 80（+7天会员）<br>
+        👑 私董会：邀请人 200 / 新人 150（+7天会员）
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Health Checkin ───────────── -->
+<div id="screen-health" class="screen">
+  <div class="nav-top">
+    <div class="back" onclick="openScreen('home')">←</div>
+    <div class="title">❤️ 健康打卡</div>
+  </div>
+  <div class="card health-form">
+    <label>今日心情</label>
+    <div class="toggle" id="mood-group" style="flex-wrap:wrap">
+      <button onclick="setMood('🔥')">🔥 爆棚</button>
+      <button onclick="setMood('😊')" class="on">😊 不错</button>
+      <button onclick="setMood('😐')">😐 一般</button>
+      <button onclick="setMood('😩')">😩 低落</button>
+    </div>
+    <label>记录一下今天（可选）</label>
+    <textarea id="h-note" placeholder="三餐怎么样？运动了吗？睡眠如何？..."></textarea>
+    <div style="height:18px"></div>
+    <button onclick="submitHealth()">提交打卡</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ── State ─────────────────────
+// ── State ─────────────────
 const STORAGE_KEY = 'laowang_h5_token';
 let currentUser = null;
+let currentFeature = null;
+let features = null;
+let currentMood = '😊';
 
-// ── Helpers ───────────────────
+// ── Helpers ───────────────
 function $(id) { return document.getElementById(id); }
 function openScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -269,12 +376,16 @@ function openScreen(name) {
   window.scrollTo(0, 0);
 
   if (name === 'cognition') loadCognition();
+  if (name === 'news') loadNews();
+  if (name === 'leaderboard') loadLeaderboard();
+  if (name === 'shop') loadShop();
+  if (name === 'invite') loadInvite();
 }
 function toast(msg) {
   const t = $('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 1800);
+  setTimeout(() => t.classList.remove('show'), 2000);
 }
 async function api(path, opts={}) {
   const token = localStorage.getItem(STORAGE_KEY);
@@ -291,7 +402,7 @@ async function api(path, opts={}) {
   return data;
 }
 
-// ── Login ─────────────────────
+// ── Login ─────────────────
 async function login(token) {
   $('login-error').textContent = '';
   try {
@@ -304,7 +415,7 @@ async function login(token) {
     if (!res.ok) throw new Error(data.detail || '登录失败');
     localStorage.setItem(STORAGE_KEY, token);
     currentUser = data.user;
-    await loadDashboard();
+    await loadHome();
     openScreen('home');
   } catch (e) {
     $('login-error').textContent = e.message;
@@ -318,74 +429,301 @@ function logout() {
   openScreen('login');
 }
 
-// ── Dashboard ─────────────────
-async function loadDashboard() {
+// ── Home / Dashboard ─────────────────
+async function loadHome() {
   try {
     const me = await api('/api/h5/me');
+    currentUser = me;
     $('user-name').textContent = me.name;
     $('st-points').textContent = me.points;
     $('st-streak').textContent = me.checkin_streak;
     $('st-rank').textContent = me.rank || '-';
-    const tier = me.membership_tier || 'free';
+    const tier = me.membership_status === 'admin' ? 'admin' : (me.membership_tier || 'free');
     const badge = $('tier-badge');
     badge.className = 'tier-badge ' + tier;
-    badge.textContent = tier === 'vip' ? 'VIP' : tier === 'member' ? '会员' : 'FREE';
+    badge.textContent = tier === 'admin' ? 'ADMIN' : tier === 'vip' ? 'VIP' : tier === 'member' ? '会员' : 'FREE';
+
+    // 加载功能列表
+    if (!features) features = await api('/api/h5/features');
+    renderFeatures();
   } catch (e) {
     toast(e.message);
   }
 }
 
+function renderFeatures() {
+  const container = $('features-container');
+  const sections = [
+    { key: 'growth', title: '🧠 个人成长' },
+    { key: 'health', title: '💪 个人健康' },
+    { key: 'wealth', title: '💰 创业财富' },
+  ];
+  let html = '';
+  for (const s of sections) {
+    const items = features[s.key] || [];
+    if (!items.length) continue;
+    html += `<div class="section-title">${s.title}</div><div class="feature-grid">`;
+    for (const f of items) {
+      const pts = f.points > 0 ? `<div class="points">🪙 +${f.points}</div>` : '';
+      html += `<div class="feature-card" onclick="openFeature('${f.key}', '${f.emoji}', '${f.name}')">
+        <div class="emoji">${f.emoji}</div>
+        <div class="title">${f.name}</div>
+        ${pts}
+      </div>`;
+    }
+    html += '</div>';
+  }
+  // 健康打卡
+  html += `<div class="section-title">📊 打卡</div><div class="feature-grid">
+    <div class="feature-card" onclick="openScreen('health')">
+      <div class="emoji">❤️</div>
+      <div class="title">健康打卡</div>
+      <div class="points">🪙 +10</div>
+    </div>
+  </div>`;
+  container.innerHTML = html;
+}
+
+// ── Daily Checkin ─────────────────
+async function doCheckin() {
+  try {
+    const r = await api('/api/h5/checkin', { method: 'POST' });
+    if (r.success) {
+      toast(`✅ 签到成功 +${r.points_earned} 积分`);
+      $('st-points').textContent = r.total_points;
+      $('st-streak').textContent = r.streak;
+    } else {
+      toast('今日已签到');
+    }
+  } catch (e) { toast(e.message); }
+}
+
 // ── Cognition ─────────────────
 async function loadCognition() {
-  $('cognition-loading').style.display = 'block';
-  $('cognition-content').style.display = 'none';
-  $('feedback-wrap').style.display = 'none';
-  $('reflection-input').value = '';
+  $('cog-loading').style.display = 'block';
+  $('cog-content').style.display = 'none';
+  $('cog-feedback-wrap').style.display = 'none';
+  $('cog-input').value = '';
+  $('btn-cog-submit').disabled = false;
+  $('btn-cog-submit').textContent = '提交并获取反馈';
+  $('btn-cog-submit').style.display = 'block';
 
   try {
     const t = await api('/api/h5/cognition/today');
     $('cog-title').textContent = t.title;
     $('cog-desc').textContent = t.desc;
     $('cog-question').textContent = t.question;
-    $('cognition-loading').style.display = 'none';
-    $('cognition-content').style.display = 'block';
+    $('cog-loading').style.display = 'none';
+    $('cog-content').style.display = 'block';
   } catch (e) {
-    $('cognition-loading').textContent = '加载失败：' + e.message;
+    $('cog-loading').textContent = '加载失败：' + e.message;
   }
 }
-
 async function submitCognition() {
-  const reflection = $('reflection-input').value.trim();
-  if (reflection.length < 5) { toast('至少写几句话'); return; }
-
-  const btn = $('btn-submit-cog');
+  const v = $('cog-input').value.trim();
+  if (v.length < 5) { toast('至少写几句话'); return; }
+  const btn = $('btn-cog-submit');
   btn.disabled = true; btn.textContent = '老王正在思考...';
-
   try {
     const res = await api('/api/h5/cognition/submit', {
-      method: 'POST',
-      body: JSON.stringify({ reflection })
+      method: 'POST', body: JSON.stringify({ reflection: v })
     });
-    $('feedback-text').textContent = res.feedback;
-    $('feedback-wrap').style.display = 'block';
+    $('cog-feedback').textContent = res.feedback;
+    $('cog-feedback-wrap').style.display = 'block';
     btn.style.display = 'none';
     if (res.total_points != null) $('st-points').textContent = res.total_points;
   } catch (e) {
-    toast(e.message);
-    btn.disabled = false; btn.textContent = '提交并获取反馈';
+    toast(e.message); btn.disabled = false; btn.textContent = '提交并获取反馈';
   }
 }
 
-// ── Init ──────────────────────
+// ── Generic AI Feature ─────────────────
+async function openFeature(key, emoji, name) {
+  if (key === 'daily_cognition') { openScreen('cognition'); return; }
+  if (key === 'news_brief') { openScreen('news'); return; }
+
+  currentFeature = key;
+  $('ai-title').textContent = `${emoji} ${name}`;
+  $('ai-input').value = '';
+  $('ai-result-wrap').style.display = 'none';
+  $('ai-form').style.display = 'block';
+  openScreen('ai');
+
+  try {
+    const info = await api('/api/h5/feature/' + key);
+    $('ai-label').textContent = info.input_label;
+    $('ai-input').placeholder = info.placeholder;
+  } catch (e) { toast(e.message); }
+}
+async function submitAI() {
+  const v = $('ai-input').value.trim();
+  if (v.length < 3) { toast('输入太短了'); return; }
+  const btn = $('btn-ai-submit');
+  btn.disabled = true; btn.textContent = '老王正在思考...';
+  try {
+    const res = await api('/api/h5/ai/' + currentFeature, {
+      method: 'POST', body: JSON.stringify({ input: v })
+    });
+    $('ai-result').textContent = res.result;
+    $('ai-result-wrap').style.display = 'block';
+    $('ai-form').style.display = 'none';
+    if (res.points_earned > 0) {
+      $('ai-points').textContent = `🪙 +${res.points_earned} 积分`;
+      $('ai-points-wrap').style.display = 'block';
+      if (res.total_points != null) $('st-points').textContent = res.total_points;
+    } else {
+      $('ai-points-wrap').style.display = 'none';
+    }
+  } catch (e) {
+    toast(e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = '提交给老王';
+  }
+}
+function resetAI() {
+  $('ai-input').value = '';
+  $('ai-result-wrap').style.display = 'none';
+  $('ai-form').style.display = 'block';
+}
+
+// ── News Brief ─────────────────
+async function loadNews() {
+  $('news-loading').style.display = 'block';
+  $('news-content').style.display = 'none';
+  try {
+    const r = await api('/api/h5/news/brief');
+    $('news-result').textContent = r.result;
+    $('news-loading').style.display = 'none';
+    $('news-content').style.display = 'block';
+  } catch (e) {
+    $('news-loading').textContent = '加载失败：' + e.message;
+  }
+}
+
+// ── Leaderboard ─────────────────
+async function loadLeaderboard() {
+  $('lb-loading').style.display = 'block';
+  $('lb-list').innerHTML = '';
+  try {
+    const data = await fetch('/api/leaderboard').then(r => r.json());
+    $('lb-loading').style.display = 'none';
+    let html = '';
+    for (const u of data) {
+      const rankCls = u.rank === 1 ? 'top1' : u.rank === 2 ? 'top2' : u.rank === 3 ? 'top3' : '';
+      html += `<div class="lb-row">
+        <div class="lb-rank ${rankCls}">#${u.rank}</div>
+        <div class="lb-name">${u.name}</div>
+        <div class="lb-points">${u.points}</div>
+      </div>`;
+    }
+    if (!html) html = '<div class="loading">暂无数据</div>';
+    $('lb-list').innerHTML = html;
+  } catch (e) {
+    $('lb-loading').textContent = '加载失败';
+  }
+}
+
+// ── Shop ─────────────────
+async function loadShop() {
+  $('shop-loading').style.display = 'block';
+  $('shop-sections').innerHTML = '';
+  try {
+    const data = await api('/api/shop');
+    $('shop-points').textContent = data.points;
+    $('shop-loading').style.display = 'none';
+    let html = '';
+    for (const sec of data.sections) {
+      html += `<div class="section-title">${sec.title}</div>`;
+      for (const it of sec.items) {
+        html += `<div class="shop-item">
+          <div class="info">
+            <div class="name">${it.name}</div>
+            <div class="cost">${it.cost} 积分${it.desc ? ' · ' + it.desc : ''}</div>
+          </div>
+          <button class="btn-small" onclick="redeem('${it.id}','${it.name.replace(/'/g,"\\'")}')">兑换</button>
+        </div>`;
+      }
+    }
+    $('shop-sections').innerHTML = html;
+  } catch (e) {
+    $('shop-loading').textContent = '加载失败: ' + e.message;
+  }
+}
+async function redeem(id, name) {
+  if (!confirm(`确认兑换：${name}？`)) return;
+  try {
+    const res = await fetch('/api/redeem', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem(STORAGE_KEY) },
+      body: JSON.stringify({ id })
+    });
+    const data = await res.json();
+    if (!res.ok) { toast(data.detail || '兑换失败'); return; }
+    toast(`兑换成功：${data.reward}`);
+    $('shop-points').textContent = data.remaining_points;
+    $('st-points').textContent = data.remaining_points;
+  } catch (e) { toast(e.message); }
+}
+
+// ── Invite ─────────────────
+async function loadInvite() {
+  $('invite-loading').style.display = 'block';
+  $('invite-content').style.display = 'none';
+  try {
+    const d = await api('/api/h5/invite');
+    $('invite-link').textContent = d.link;
+    $('invite-tier').textContent = d.tier === 'admin' ? '管理员' : d.tier === 'vip' ? '👑 私董会' : d.tier === 'member' ? '💎 会员' : '🆓 免费';
+    $('invite-count').textContent = d.total_invited;
+    $('invite-loading').style.display = 'none';
+    $('invite-content').style.display = 'block';
+  } catch (e) { toast(e.message); }
+}
+function copyInvite() {
+  const link = $('invite-link').textContent;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(link).then(() => toast('已复制'));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = link; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    toast('已复制');
+  }
+}
+
+// ── Health ─────────────────
+function setMood(m) {
+  currentMood = m;
+  document.querySelectorAll('#mood-group button').forEach(b => {
+    b.classList.toggle('on', b.textContent.includes(m));
+  });
+}
+async function submitHealth() {
+  const note = $('h-note').value.trim();
+  try {
+    const res = await api('/api/h5/health-checkin', {
+      method: 'POST',
+      body: JSON.stringify({ mood: currentMood, note })
+    });
+    if (res.success) {
+      toast(`✅ 打卡成功 +${res.points_earned} 积分`);
+      $('st-points').textContent = res.total_points;
+    } else {
+      toast(res.message || '今日已打卡');
+    }
+    openScreen('home');
+  } catch (e) { toast(e.message); }
+}
+
+// ── Init ──────────────────
 $('btn-login').addEventListener('click', () => {
   const t = $('token-input').value.trim();
   if (!t) { $('login-error').textContent = '请粘贴 token'; return; }
   login(t);
 });
-$('btn-submit-cog').addEventListener('click', submitCognition);
+$('btn-cog-submit').addEventListener('click', submitCognition);
+$('btn-ai-submit').addEventListener('click', submitAI);
 $('token-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') $('btn-login').click(); });
 
-// 检查 URL hash 中是否有 token（从 Bot 发来的登录链接）
 (async function init() {
   const hash = window.location.hash || '';
   const match = hash.match(/token=([^&]+)/);
@@ -395,11 +733,10 @@ $('token-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') $(
     await login(token);
     return;
   }
-  // 已登录
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
     try {
-      await loadDashboard();
+      await loadHome();
       openScreen('home');
       return;
     } catch (e) {}

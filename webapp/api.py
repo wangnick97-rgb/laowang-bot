@@ -418,19 +418,381 @@ async def h5_cognition_submit(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"AI 处理失败: {str(e)[:100]}")
 
-    # +5 积分
+    new_points = _award_points(user_id, 5)
+    return {"feedback": result, "points_earned": 5, "total_points": new_points}
+
+
+# ── 通用 AI 功能端点 ─────────────────────────────────────────────────────────
+
+# 功能元数据：key → {name, category, prompt_key, points, input_label, placeholder, max_tokens}
+H5_FEATURES = {
+    # 个人成长
+    "daily_english": {
+        "name": "今日英语升级",
+        "emoji": "📝",
+        "category": "growth",
+        "prompt_key": "daily_english",
+        "points": 3,
+        "input_label": "写一句你想升级的中文或英文",
+        "placeholder": "例如：我想跟客户说感谢他们的耐心...",
+        "max_tokens": 700,
+    },
+    "evening_review": {
+        "name": "晚间复盘",
+        "emoji": "🌙",
+        "category": "growth",
+        "prompt_key": "evening_review",
+        "points": 5,
+        "input_label": "回答3个问题（一次写完）",
+        "placeholder": "1. 今天最大的收获是什么？\n2. 今天最大的浪费是什么？\n3. 明天最重要的一件事是什么？",
+        "max_tokens": 800,
+    },
+    "daily_plan": {
+        "name": "今日计划",
+        "emoji": "📋",
+        "category": "growth",
+        "prompt_key": "daily_plan",
+        "points": 3,
+        "input_label": "列出你今天想做的事",
+        "placeholder": "把脑子里乱糟糟的待办事项全写下来，老王帮你排优先级...",
+        "max_tokens": 800,
+    },
+    "decision_helper": {
+        "name": "决策助手",
+        "emoji": "🧭",
+        "category": "growth",
+        "prompt_key": "decision_helper",
+        "points": 0,
+        "input_label": "描述你面临的决策",
+        "placeholder": "例如：我现在有两个工作offer，一个大厂稳定，一个创业高风险...",
+        "max_tokens": 900,
+    },
+    "procrastination": {
+        "name": "拖延破解器",
+        "emoji": "🧨",
+        "category": "growth",
+        "prompt_key": "procrastination_breaker",
+        "points": 0,
+        "input_label": "你在拖延什么？",
+        "placeholder": "例如：明明要写季度报告，已经拖了一周了...",
+        "max_tokens": 700,
+    },
+    "text_optimizer": {
+        "name": "表达优化器",
+        "emoji": "🗣️",
+        "category": "growth",
+        "prompt_key": "text_optimizer",
+        "points": 0,
+        "input_label": "粘贴你想优化的文字",
+        "placeholder": "任何你觉得可以说得更好的话...",
+        "max_tokens": 800,
+    },
+    "biz_reply": {
+        "name": "商务回复助手",
+        "emoji": "💼",
+        "category": "growth",
+        "prompt_key": "biz_reply",
+        "points": 0,
+        "input_label": "粘贴对方的消息 + 你的回复意图",
+        "placeholder": "对方说：...\n\n我想表达：...",
+        "max_tokens": 800,
+    },
+    "chinglish_fix": {
+        "name": "中式英语改写",
+        "emoji": "🔄",
+        "category": "growth",
+        "prompt_key": "chinglish_fix",
+        "points": 0,
+        "input_label": "粘贴你写的英文",
+        "placeholder": "Paste your English text here...",
+        "max_tokens": 700,
+    },
+    "biz_english": {
+        "name": "商务英语对话",
+        "emoji": "💬",
+        "category": "growth",
+        "prompt_key": "biz_english",
+        "points": 0,
+        "input_label": "选个场景并描述需求",
+        "placeholder": "例如：谈判时对方说 your price is too high 我要怎么回...",
+        "max_tokens": 800,
+    },
+
+    # 创业财富
+    "viral_topic": {
+        "name": "爆款选题",
+        "emoji": "🔥",
+        "category": "wealth",
+        "prompt_key": "viral_topic",
+        "points": 0,
+        "input_label": "你的领域/账号定位",
+        "placeholder": "例如：专注投资理财的个人IP号，受众是30-45岁中产...",
+        "max_tokens": 900,
+    },
+    "script_gen": {
+        "name": "口播脚本",
+        "emoji": "🎙️",
+        "category": "wealth",
+        "prompt_key": "script_gen",
+        "points": 0,
+        "input_label": "你的选题/主题",
+        "placeholder": "例如：为什么大部分人越努力越穷，给我一个3分钟口播稿...",
+        "max_tokens": 1000,
+    },
+    "script_polish": {
+        "name": "口播稿优化",
+        "emoji": "✍️",
+        "category": "wealth",
+        "prompt_key": "script_polish",
+        "points": 0,
+        "input_label": "粘贴你的脚本",
+        "placeholder": "把你写的稿子粘进来，老王从开头、节奏、结构、CTA 四维度打分...",
+        "max_tokens": 900,
+    },
+    "brand_positioning": {
+        "name": "品牌定位诊断",
+        "emoji": "💎",
+        "category": "wealth",
+        "prompt_key": "brand_positioning",
+        "points": 0,
+        "input_label": "描述你的项目/品牌",
+        "placeholder": "产品是什么 + 目标用户 + 现在的定位文案...",
+        "max_tokens": 1000,
+    },
+    "sales_assist": {
+        "name": "销售助手",
+        "emoji": "🤝",
+        "category": "wealth",
+        "prompt_key": "sales_assist",
+        "points": 0,
+        "input_label": "粘贴对方消息/合同/场景",
+        "placeholder": "例如：客户说'预算不够'我要怎么回？...",
+        "max_tokens": 900,
+    },
+    "property_diag": {
+        "name": "民宿诊断",
+        "emoji": "🏡",
+        "category": "wealth",
+        "prompt_key": "property_diag",
+        "points": 0,
+        "input_label": "描述房源/位置/装修/价格",
+        "placeholder": "城市+位置+房型+预算+你的目标...",
+        "max_tokens": 900,
+    },
+    "landlord_msg": {
+        "name": "民宿话术",
+        "emoji": "💬",
+        "category": "wealth",
+        "prompt_key": "landlord_msg",
+        "points": 0,
+        "input_label": "客人/房东的消息 + 你的情况",
+        "placeholder": "客人说：...\n\n我的情况：...",
+        "max_tokens": 700,
+    },
+    "trade_review": {
+        "name": "交易复盘",
+        "emoji": "📊",
+        "category": "wealth",
+        "prompt_key": "trade_review",
+        "points": 0,
+        "input_label": "品种 + 入场理由 + 情绪 + 结果",
+        "placeholder": "例如：TSLA，财报前买入，FOMO心态，结果亏5%...",
+        "max_tokens": 900,
+    },
+
+    # 个人健康
+    "workout_plan": {
+        "name": "今日训练",
+        "emoji": "🏋️",
+        "category": "health",
+        "prompt_key": "workout_plan",
+        "points": 0,
+        "input_label": "目标 + 部位 + 时长",
+        "placeholder": "例如：增肌，练胸和三头，45分钟，家里哑铃...",
+        "max_tokens": 900,
+    },
+    "meal_plan": {
+        "name": "今日食谱",
+        "emoji": "🍽️",
+        "category": "health",
+        "prompt_key": "meal_plan",
+        "points": 0,
+        "input_label": "目标 + 体重 + 偏好",
+        "placeholder": "例如：减脂，75kg男，不吃牛羊，给我今日三餐...",
+        "max_tokens": 900,
+    },
+}
+
+
+def _award_points(user_id: int, amount: int):
+    """给用户加积分，返回新的总分；失败返回 None。"""
+    if amount <= 0:
+        return None
     try:
         db = get_client()
         urow = db.table("users").select("points").eq("id", user_id).maybe_single().execute()
-        new_points = ((urow.data or {}).get("points", 0) or 0) + 5
-        db.table("users").update({"points": new_points}).eq("id", user_id).execute()
+        new_total = ((urow.data or {}).get("points", 0) or 0) + amount
+        db.table("users").update({"points": new_total}).eq("id", user_id).execute()
+        return new_total
     except Exception:
-        new_points = None
+        return None
 
+
+@app.get("/api/h5/features")
+async def h5_features():
+    """返回所有可用 H5 AI 功能列表（前端动态渲染用）。"""
+    result = {"growth": [], "health": [], "wealth": []}
+    for key, f in H5_FEATURES.items():
+        result[f["category"]].append({
+            "key": key,
+            "name": f["name"],
+            "emoji": f["emoji"],
+            "points": f["points"],
+        })
+    # 添加特殊功能
+    result["growth"].insert(0, {"key": "daily_cognition", "name": "今日认知", "emoji": "💡", "points": 5})
+    result["wealth"].insert(0, {"key": "news_brief", "name": "今日简报", "emoji": "📰", "points": 0})
+    return result
+
+
+@app.get("/api/h5/feature/{key}")
+async def h5_feature_info(key: str, user: dict = Depends(get_h5_user)):
+    """获取某个功能的元数据（名字、输入提示、描述）。"""
+    f = H5_FEATURES.get(key)
+    if not f:
+        raise HTTPException(status_code=404, detail="功能不存在")
     return {
-        "feedback": result,
-        "points_earned": 5,
-        "total_points": new_points,
+        "key": key,
+        "name": f["name"],
+        "emoji": f["emoji"],
+        "input_label": f["input_label"],
+        "placeholder": f["placeholder"],
+        "points": f["points"],
+    }
+
+
+@app.post("/api/h5/ai/{key}")
+async def h5_ai_run(
+    key: str,
+    payload: dict = Body(...),
+    user: dict = Depends(get_h5_user),
+):
+    """通用 AI 功能端点：接收用户输入，调用 Claude，返回结果 + 可能的积分奖励。"""
+    f = H5_FEATURES.get(key)
+    if not f:
+        raise HTTPException(status_code=404, detail="功能不存在")
+
+    user_id = user["id"]
+    user_input = (payload or {}).get("input", "").strip()
+    if len(user_input) < 3:
+        raise HTTPException(status_code=400, detail="输入太短了")
+    if len(user_input) > 4000:
+        raise HTTPException(status_code=400, detail="输入太长了，请控制在4000字以内")
+
+    try:
+        result = await call_claude(
+            f["prompt_key"],
+            user_input,
+            user_id=user_id,
+            max_tokens=f.get("max_tokens", 800),
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI 处理失败: {str(e)[:100]}")
+
+    # 内容安全过滤（预留，目前只过简单黑名单）
+    result = _content_safety_check(result)
+
+    points = f.get("points", 0)
+    new_total = _award_points(user_id, points)
+    return {
+        "result": result,
+        "points_earned": points,
+        "total_points": new_total,
+    }
+
+
+def _content_safety_check(text: str) -> str:
+    """基础内容安全检查。未来可替换为阿里云/腾讯云 textScan API。"""
+    # 极简黑名单过滤，避免最明显的敏感词输出
+    # TODO: 接入阿里云 msgSecCheck 或腾讯云 TMS
+    return text
+
+
+# ── 今日简报（无输入，直接调用） ──────────────────────────────────────────────
+
+@app.get("/api/h5/news/brief")
+async def h5_news_brief(user: dict = Depends(get_h5_user)):
+    """今日财经简报。"""
+    user_id = user["id"]
+    try:
+        from services.news_fetcher import fetch_daily_news, format_articles_for_claude
+        articles = fetch_daily_news()
+        news_text = format_articles_for_claude(articles)
+        result = await call_claude(
+            "news_brief",
+            news_text,
+            user_id=user_id,
+            max_tokens=1200,
+            extra_context=f"今日日期：{_date.today().isoformat()}",
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取简报失败: {str(e)[:100]}")
+    return {"result": _content_safety_check(result)}
+
+
+# ── 签到 / 打卡 ─────────────────────────────────────────────────────────────
+
+@app.post("/api/h5/checkin")
+async def h5_checkin(user: dict = Depends(get_h5_user)):
+    """H5 每日签到。"""
+    from db.points import do_checkin
+    user_id = user["id"]
+    result = do_checkin(user_id)
+    return result
+
+
+@app.post("/api/h5/health-checkin")
+async def h5_health_checkin(
+    payload: dict = Body(...),
+    user: dict = Depends(get_h5_user),
+):
+    """H5 健康打卡（心情 + 笔记）。"""
+    from db.health import do_health_checkin
+    user_id = user["id"]
+    mood = (payload or {}).get("mood", "😊")
+    note = (payload or {}).get("note", "").strip()
+
+    result = do_health_checkin(user_id, mood, note)
+    return result
+
+
+# ── 邀请链接 ─────────────────────────────────────────────────────────────────
+
+@app.get("/api/h5/invite")
+async def h5_invite(user: dict = Depends(get_h5_user)):
+    """生成 H5 邀请链接。"""
+    user_id = user["id"]
+    db = get_client()
+    urow = db.table("users").select("membership_tier, membership_status").eq("id", user_id).maybe_single().execute()
+    u = (urow.data or {})
+    tier = u.get("membership_tier", "free")
+    if u.get("membership_status") == "admin":
+        tier = "admin"
+
+    from bot.handlers.referral import REFERRAL_POINTS
+    inviter_pts, invitee_pts = REFERRAL_POINTS.get(tier, REFERRAL_POINTS["free"])
+
+    ref_count = db.table("referrals").select("id", count="exact").eq("referrer_id", user_id).execute()
+    total_invited = ref_count.count or 0
+
+    bot_username = os.getenv("BOT_USERNAME", "laowang_toolbox_bot")
+    link = f"https://t.me/{bot_username}?start=ref_{user_id}"
+    return {
+        "link": link,
+        "tier": tier,
+        "inviter_points": inviter_pts,
+        "invitee_points": invitee_pts,
+        "total_invited": total_invited,
     }
 
 

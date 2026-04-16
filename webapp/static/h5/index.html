@@ -1101,6 +1101,7 @@ let currentUser = null;
 let currentFeature = null;
 let features = null;
 let currentMood = '😊';
+let H5_FEATURES_KEYS = [];
 
 // ── Helpers ───────────────
 function $(id) { return document.getElementById(id); }
@@ -1197,7 +1198,13 @@ async function loadHome() {
     badge.className = 'tier-badge ' + tier;
     badge.textContent = tier === 'admin' ? 'Admin' : tier === 'vip' ? 'VIP' : tier === 'member' ? 'Member' : 'Free';
 
-    if (!features) features = await api('/api/h5/features');
+    if (!features) {
+      features = await api('/api/h5/features');
+      H5_FEATURES_KEYS = [];
+      for (const cat of Object.values(features)) {
+        for (const f of cat) H5_FEATURES_KEYS.push(f.key);
+      }
+    }
     renderFeatures();
   } catch (e) {
     toast(e.message);
@@ -1895,23 +1902,86 @@ $('token-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') $(
 
 (async function init() {
   const hash = window.location.hash || '';
-  const match = hash.match(/token=([^&]+)/);
-  if (match) {
-    const token = decodeURIComponent(match[1]);
-    history.replaceState(null, '', window.location.pathname);
+  const params = new URLSearchParams(window.location.search);
+
+  // 1. Token login (from /h5token link)
+  const tokenMatch = hash.match(/token=([^&]+)/);
+  if (tokenMatch) {
+    const token = decodeURIComponent(tokenMatch[1]);
+    history.replaceState(null, '', window.location.pathname + window.location.search);
     await login(token);
+    // Check for #go= deep link after login
+    const goMatch = hash.match(/go=([^&]+)/);
+    if (goMatch) handleDeepLink(goMatch[1]);
     return;
   }
+
+  // 2. Already logged in
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
     try {
       await loadHome();
       openScreen('home');
+      // Handle #go= deep link from WeChat menu
+      const goMatch = hash.match(/go=([^&]+)/);
+      if (goMatch) handleDeepLink(goMatch[1]);
       return;
     } catch (e) {}
   }
   openScreen('login');
 })();
+
+// Deep link handler: #go=xxx → open feature or screen
+function handleDeepLink(target) {
+  // Direct screen navigation
+  const screenMap = {
+    'home': 'home',
+    'shop': 'shop',
+    'leaderboard': 'leaderboard',
+    'invite': 'invite',
+    'consult': 'consult',
+    'report': 'report',
+    'badges': 'badges',
+    'membership': 'membership',
+    'health': 'health',
+    'gym': 'gym',
+    'deepwork': 'deepwork',
+    'protein': 'protein',
+    'calorie': 'calorie',
+    'plans': 'plans',
+    'portfolio': 'portfolio',
+  };
+  if (screenMap[target]) {
+    openScreen(screenMap[target]);
+    return;
+  }
+  // Special actions
+  if (target === 'checkin') {
+    doCheckin();
+    return;
+  }
+  if (target === 'cognition' || target === 'daily_cognition') {
+    openScreen('cognition');
+    return;
+  }
+  if (target === 'news' || target === 'news_brief') {
+    openScreen('news');
+    return;
+  }
+  // Static content
+  const staticKeys = ['strategy', 'us_stock', 'snacks', 'supplements'];
+  if (staticKeys.includes(target)) {
+    loadStatic(target);
+    return;
+  }
+  // AI feature (generic)
+  if (H5_FEATURES_KEYS && H5_FEATURES_KEYS.includes(target)) {
+    openFeature(target, '', target);
+    return;
+  }
+  // Fallback: try as feature
+  openFeature(target, '', target);
+}
 </script>
 </body>
 </html>

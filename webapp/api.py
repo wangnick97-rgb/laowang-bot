@@ -110,6 +110,53 @@ _static_dir = os.path.join(os.path.dirname(__file__), "static")
 
 
 # H5 页面禁用缓存（避免用户看不到最新版本）
+# ── 微信 OAuth 登录 ─────────────────────────────────────────────────────────
+
+from fastapi.responses import RedirectResponse
+
+@app.get("/api/wx/auth")
+async def wx_auth(redirect: str = ""):
+    """Step 1: 重定向到微信授权页。redirect 参数用于登录后跳转的目标页。"""
+    from webapp.wx_oauth import get_oauth_url, WX_APPID
+    if not WX_APPID:
+        raise HTTPException(status_code=500, detail="微信 AppID 未配置")
+    callback_url = f"https://laowangsystem.com/api/wx/callback"
+    state = redirect or ""  # 把目标页存在 state 里
+    oauth_url = get_oauth_url(callback_url, state=state)
+    return RedirectResponse(url=oauth_url)
+
+
+@app.get("/api/wx/callback")
+async def wx_callback(code: str = "", state: str = ""):
+    """Step 2: 微信回调 → 用 code 换 openid → 生成 token → 重定向回 H5。"""
+    from webapp.wx_oauth import code_to_openid, find_or_create_wx_user
+    if not code:
+        raise HTTPException(status_code=400, detail="缺少 code")
+
+    # 用 code 换 openid
+    wx_data = await code_to_openid(code)
+    if not wx_data:
+        raise HTTPException(status_code=401, detail="微信授权失败")
+
+    openid = wx_data["openid"]
+
+    # 查找或创建用户
+    user_id = find_or_create_wx_user(openid)
+
+    # 生成 H5 token
+    token = generate_h5_token(user_id)
+
+    # 重定向回 H5，token 通过 hash 传递
+    import time
+    v = int(time.time())
+    target = state if state else ""
+    h5_url = f"https://laowangsystem.com/webapp/h5/index.html?v={v}#token={token}"
+    if target:
+        h5_url += f"&go={target}"
+
+    return RedirectResponse(url=h5_url)
+
+
 @app.get("/MP_verify_D9Lb0vQpq11ylBBG.txt")
 async def wx_verify_file():
     """微信域名验证文件。"""

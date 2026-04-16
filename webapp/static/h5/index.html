@@ -620,8 +620,13 @@ textarea { resize: none; min-height: 140px; line-height: 1.6; }
     <div style="height:12px"></div>
     <button id="btn-login">登录</button>
     <div class="error" id="login-error"></div>
-    <p class="sub" style="margin-top:24px; text-align:center; font-size:12px">
-      没有 token？联系 @scorpia2004 获取
+    <div id="wx-login-section" style="display:none; margin-top:20px">
+      <button onclick="wxLogin()" style="background: linear-gradient(135deg, #07c160, #06ad56)">
+        微信一键登录
+      </button>
+    </div>
+    <p class="sub" style="margin-top:16px; text-align:center; font-size:12px">
+      没有 token？<span id="login-hint">联系 @scorpia2004 获取</span>
     </p>
   </div>
 </div>
@@ -1900,6 +1905,13 @@ $('btn-cog-submit').addEventListener('click', submitCognition);
 $('btn-ai-submit').addEventListener('click', submitAI);
 $('token-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') $('btn-login').click(); });
 
+// 在微信浏览器里显示微信登录按钮
+if (isWeChat()) {
+  const wxSection = $('wx-login-section');
+  if (wxSection) wxSection.style.display = 'block';
+  $('login-hint').textContent = '或点击上方微信一键登录';
+}
+
 (async function init() {
   const hash = window.location.hash || '';
   const params = new URLSearchParams(window.location.search);
@@ -1928,8 +1940,24 @@ $('token-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') $(
       return;
     } catch (e) {}
   }
+  // No token saved — check if in WeChat, auto-redirect to OAuth
+  if (isWeChat()) {
+    // 在微信里且未登录 → 自动跳转微信 OAuth
+    const target = hash.match(/go=([^&]+)/);
+    const redirect = target ? target[1] : '';
+    window.location.href = '/api/wx/auth?redirect=' + encodeURIComponent(redirect);
+    return;
+  }
   openScreen('login');
 })();
+
+function isWeChat() {
+  return /MicroMessenger/i.test(navigator.userAgent);
+}
+
+function wxLogin() {
+  window.location.href = '/api/wx/auth';
+}
 
 // Deep link handler: #go=xxx → open feature or screen
 function handleDeepLink(target) {

@@ -110,10 +110,10 @@ _static_dir = os.path.join(os.path.dirname(__file__), "static")
 
 
 # H5 页面禁用缓存（避免用户看不到最新版本）
-@app.get("/MP_verify_D9Lb0vQpq1IyBBG.txt")
+@app.get("/MP_verify_D9Lb0vQpq11ylBBG.txt")
 async def wx_verify_file():
     """微信域名验证文件。"""
-    return FileResponse(os.path.join(_static_dir, "MP_verify_D9Lb0vQpq1IyBBG.txt"))
+    return FileResponse(os.path.join(_static_dir, "MP_verify_D9Lb0vQpq11ylBBG.txt"))
 
 
 @app.get("/webapp/h5/")

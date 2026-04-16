@@ -58,9 +58,12 @@ def find_or_create_wx_user(openid: str) -> int:
     db = get_client()
 
     # 先查有没有已绑定此 openid 的用户
-    result = db.table("users").select("id").eq("wx_openid", openid).maybe_single().execute()
-    if result and result.data:
-        return result.data["id"]
+    try:
+        result = db.table("users").select("id").eq("wx_openid", openid).maybe_single().execute()
+        if result and result.data:
+            return result.data["id"]
+    except Exception:
+        pass  # 没找到，继续创建
 
     # 没有 → 创建新用户（用 openid hash 做临时 ID）
     import hashlib

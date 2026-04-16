@@ -1379,8 +1379,11 @@ async function loadPortfolio() {
       if (cats[s.weight]) cats[s.weight].push(s);
     }
     let html = '';
-    const tierLabel = d.tier === 'vip' || d.tier === 'admin' ? '👑 私董会 · 完整持仓'
-      : d.tier === 'member' ? '💎 会员 · 季度快照' : '🆓 免费预览';
+    if (d.disclaimer) {
+      html += `<div class="card" style="background:rgba(255,87,119,0.08); border-color:rgba(255,87,119,0.2)"><p style="font-size:12px; color:var(--text-dim); line-height:1.6">${d.disclaimer}</p></div>`;
+    }
+    const tierLabel = d.tier === 'vip' || d.tier === 'admin' ? '👑 完整学习笔记'
+      : d.tier === 'member' ? '💎 会员 · 季度笔记' : '🆓 预览';
     html += `<div class="card"><h3>${tierLabel}</h3>`;
     for (const [name, stocks] of Object.entries(cats)) {
       if (!stocks.length) continue;

@@ -719,11 +719,11 @@ async def h5_features():
         ],
         "wealth": [
             {"key": "news_brief", "name": "今日简报", "emoji": "📰", "points": 0, "type": "special"},
-            {"key": "premarket", "name": "盘前情报", "emoji": "📊", "points": 0, "type": "special"},
-            {"key": "postmarket", "name": "盘后复盘", "emoji": "📉", "points": 0, "type": "special"},
-            {"key": "portfolio", "name": "老王持仓", "emoji": "💡", "points": 0, "type": "special"},
-            {"key": "strategy", "name": "投资策略", "emoji": "📋", "points": 0, "type": "static"},
-            {"key": "us_stock", "name": "美股开户教程", "emoji": "🏦", "points": 0, "type": "static"},
+            {"key": "premarket", "name": "市场早观察", "emoji": "📊", "points": 0, "type": "special"},
+            {"key": "postmarket", "name": "市场晚复盘", "emoji": "📉", "points": 0, "type": "special"},
+            {"key": "portfolio", "name": "老王学习笔记", "emoji": "💡", "points": 0, "type": "special"},
+            {"key": "strategy", "name": "投资学习心得", "emoji": "📋", "points": 0, "type": "static"},
+            {"key": "us_stock", "name": "海外证券指南", "emoji": "🏦", "points": 0, "type": "static"},
         ],
         "health": [
             {"key": "gym_log", "name": "健身打卡", "emoji": "🏃", "points": 8, "type": "special"},
@@ -972,8 +972,9 @@ async def h5_portfolio(user: dict = Depends(get_h5_user)):
     if u.get("membership_status") == "admin":
         tier = "admin"
 
+    disclaimer = "⚠️ 以下内容仅为个人学习记录，不构成投资建议。投资有风险，决策需谨慎。"
+
     if tier in ("vip", "admin"):
-        # 完整持仓 + 最近信号
         stocks = _FULL_PORTFOLIO
         signals = db.table("trade_signals").select("*").order("created_at", desc=True).limit(5).execute()
         return {
@@ -981,6 +982,7 @@ async def h5_portfolio(user: dict = Depends(get_h5_user)):
             "stocks": stocks,
             "signals": signals.data or [],
             "is_full": True,
+            "disclaimer": disclaimer,
         }
     elif tier == "member":
         return {
@@ -1008,8 +1010,8 @@ async def h5_content(key: str, user: dict = Depends(get_h5_user)):
     """静态内容端点：strategy/us_stock/snacks/supplements/membership/plans"""
     from webapp import h5_content as hc
     mapping = {
-        "strategy": {"title": "📋 老王投资策略", "text": hc.STRATEGY_TEXT},
-        "us_stock": {"title": "🏦 美股开户教程", "text": hc.US_STOCK_TEXT},
+        "strategy": {"title": "📋 老王投资学习心得", "text": hc.FINANCE_DISCLAIMER + hc.STRATEGY_TEXT},
+        "us_stock": {"title": "🏦 海外证券账户学习指南", "text": hc.FINANCE_DISCLAIMER + hc.US_STOCK_TEXT},
         "snacks": {"title": "🍫 零食白名单", "text": hc.SNACKS_TEXT},
         "supplements": {"title": "💊 老王补给", "text": hc.SUPPLEMENTS_TEXT},
     }

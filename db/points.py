@@ -93,7 +93,20 @@ def do_checkin(user_id: int) -> dict:
 
     base_points = 10
     streak_bonus = min(new_streak - 1, 20) * 2
-    points_earned = base_points + streak_bonus
+
+    # 🎲 签到盲盒：每次签到额外的"今日手气"加成（变量奖励，增强成瘾性）
+    # 权重：55% 平平无奇 / 25% 小惊喜 / 12% 中奖 / 6% 大奖 / 2% 头奖
+    lucky_table = [
+        (55, 0,  "平"),
+        (25, 3,  "🍀 小惊喜"),
+        (12, 7,  "✨ 中奖"),
+        (6,  15, "💫 大奖"),
+        (2,  30, "🎰 头奖！"),
+    ]
+    weights = [row[0] for row in lucky_table]
+    _, lucky_bonus, lucky_label = random.choices(lucky_table, weights=weights, k=1)[0]
+
+    points_earned = base_points + streak_bonus + lucky_bonus
 
     new_total = (info.get("points", 0) or 0) + points_earned
 
@@ -113,6 +126,10 @@ def do_checkin(user_id: int) -> dict:
     return {
         "success": True,
         "points_earned": points_earned,
+        "base_points": base_points,
+        "streak_bonus": streak_bonus,
+        "lucky_bonus": lucky_bonus,
+        "lucky_label": lucky_label,
         "streak": new_streak,
         "total_points": new_total,
         "shield_used": shield_used,

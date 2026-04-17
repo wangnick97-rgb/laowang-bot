@@ -606,6 +606,273 @@ textarea { resize: none; min-height: 140px; line-height: 1.6; }
 
 ::-webkit-scrollbar { width: 0; display: none; }
 * { -webkit-overflow-scrolling: touch; }
+
+/* ── 老王每日格言 ─────────────── */
+.daily-quote {
+  margin: 0 0 20px 0;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(124,92,255,0.12), rgba(167,139,250,0.05));
+  border: 1px solid rgba(124,92,255,0.18);
+  position: relative;
+  overflow: hidden;
+}
+.daily-quote::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 100% 0%, rgba(124,92,255,0.25), transparent 50%);
+  pointer-events: none;
+}
+.daily-quote .q-date {
+  font-size: 11px; color: var(--text-dim); letter-spacing: 1px;
+  text-transform: uppercase; font-weight: 600; margin-bottom: 6px;
+}
+.daily-quote .q-text {
+  font-size: 15px; color: var(--text); line-height: 1.55;
+  font-weight: 500; letter-spacing: -0.01em;
+}
+.daily-quote .q-sig {
+  font-size: 12px; color: var(--text-dim); margin-top: 8px;
+  text-align: right;
+}
+
+/* ── Hero narrative（本周坚持 / 百分位）───────── */
+.hero-narrative {
+  margin-top: 10px; padding-top: 12px;
+  border-top: 1px dashed var(--border-soft);
+  font-size: 12px; color: var(--text-dim);
+  letter-spacing: 0.2px; line-height: 1.5;
+}
+.hero-narrative strong {
+  color: var(--accent-light, #c4b5fd); font-weight: 700;
+}
+
+/* ── 新手任务卡片 ─────────────── */
+.onboarding-card {
+  background: linear-gradient(135deg, rgba(230,193,120,0.12), rgba(251,191,36,0.05));
+  border: 1px solid rgba(230,193,120,0.3);
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 18px;
+  position: relative; overflow: hidden;
+}
+.onboarding-card::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 0% 100%, rgba(251,191,36,0.18), transparent 60%);
+  pointer-events: none;
+}
+.onboarding-card h3 {
+  font-size: 15px; color: var(--gold, #e6c178); margin-bottom: 4px;
+  letter-spacing: -0.01em; text-transform: none;
+}
+.onboarding-card .sub {
+  font-size: 12px; margin-bottom: 14px;
+}
+.onboarding-progress {
+  height: 6px; background: rgba(255,255,255,0.08);
+  border-radius: 100px; overflow: hidden; margin-bottom: 14px;
+}
+.onboarding-progress .fill {
+  height: 100%; background: linear-gradient(90deg, #e6c178, #fbbf24);
+  transition: width 0.6s cubic-bezier(.2,.8,.2,1);
+  box-shadow: 0 0 12px rgba(251,191,36,0.5);
+}
+.onboarding-step {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0; font-size: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.onboarding-step:last-child { border-bottom: none; }
+.onboarding-step .step-icon {
+  width: 24px; height: 24px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+  background: rgba(255,255,255,0.06); color: var(--text-mute);
+  border: 1px solid var(--border-soft);
+  flex-shrink: 0;
+}
+.onboarding-step.done .step-icon {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff; border-color: #10b981;
+}
+.onboarding-step.done .step-label {
+  color: var(--text-dim); text-decoration: line-through;
+  text-decoration-color: rgba(255,255,255,0.2);
+}
+.onboarding-step .step-label { flex: 1; color: var(--text); }
+.onboarding-step .step-go {
+  font-size: 12px; color: var(--accent, #a78bfa);
+  cursor: pointer;
+}
+
+/* ── Today 单卡片 ─────────────── */
+.today-card {
+  background: var(--bg-elev1);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--border-soft);
+  border-radius: 20px; padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 16px 40px -16px rgba(0,0,0,0.4);
+}
+.today-card .head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+}
+.today-card h3 {
+  font-size: 11px; color: var(--text-dim);
+  letter-spacing: 1.2px; text-transform: uppercase; font-weight: 600;
+  margin: 0;
+}
+.today-card .head .ratio {
+  font-size: 12px; color: var(--text-dim); font-weight: 600;
+}
+.today-card .head .ratio b { color: var(--text); }
+.today-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0; cursor: pointer;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: opacity 0.2s;
+}
+.today-row:last-child { border-bottom: none; }
+.today-row:active { opacity: 0.6; }
+.today-row .t-emoji { font-size: 22px; flex-shrink: 0; }
+.today-row .t-label { flex: 1; font-size: 14px; color: var(--text); font-weight: 550; }
+.today-row .t-pts { font-size: 11px; color: var(--accent-light, #c4b5fd); font-weight: 600; }
+.today-row .t-check {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 1.5px solid var(--border-med);
+  flex-shrink: 0;
+}
+.today-row.done .t-check {
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-color: #10b981;
+  position: relative;
+}
+.today-row.done .t-check::after {
+  content: "✓"; color: #fff; font-size: 13px; font-weight: 800;
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.today-row.done .t-label { color: var(--text-dim); text-decoration: line-through; text-decoration-color: rgba(255,255,255,0.2); }
+
+/* ── Skeleton screens ─────────────── */
+.skel {
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.04) 0%,
+    rgba(255,255,255,0.08) 50%,
+    rgba(255,255,255,0.04) 100%);
+  background-size: 200% 100%;
+  animation: skelShimmer 1.4s infinite linear;
+  border-radius: 8px;
+}
+@keyframes skelShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.skel-card {
+  background: var(--bg-elev1); border: 1px solid var(--border-soft);
+  border-radius: 20px; padding: 22px; margin-bottom: 14px;
+}
+.skel-line { height: 12px; margin-bottom: 10px; }
+.skel-line.w80 { width: 80%; } .skel-line.w60 { width: 60%; } .skel-line.w40 { width: 40%; }
+.skel-line.tall { height: 20px; }
+
+/* ── 积分飞入动画 ─────────── */
+.pts-fly {
+  position: fixed; z-index: 998;
+  font-size: 32px; font-weight: 800;
+  color: var(--gold, #fbbf24);
+  text-shadow: 0 0 20px rgba(251,191,36,0.6);
+  pointer-events: none;
+  animation: ptsFly 1.2s cubic-bezier(.22,1,.36,1) forwards;
+}
+@keyframes ptsFly {
+  0%   { transform: translate(-50%, 0) scale(1);   opacity: 1; }
+  60%  { transform: translate(-50%, -120px) scale(1.3); opacity: 1; }
+  100% { transform: translate(-50%, -200px) scale(0.6); opacity: 0; }
+}
+
+/* ── Streak 里程碑全屏庆祝 ─────────── */
+.celebrate-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: radial-gradient(circle at 50% 50%, rgba(124,92,255,0.35), rgba(0,0,0,0.92));
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 14px; padding: 32px;
+  animation: celebFade 0.4s ease-out;
+}
+@keyframes celebFade { from { opacity: 0; } to { opacity: 1; } }
+.celebrate-emoji { font-size: 100px; animation: celebPop 0.8s cubic-bezier(.22,1.5,.36,1); }
+@keyframes celebPop {
+  0% { transform: scale(0) rotate(-30deg); }
+  60% { transform: scale(1.3) rotate(10deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+.celebrate-title {
+  font-size: 32px; font-weight: 800; color: #fff; letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #fbbf24, #ec4899);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.celebrate-sub { font-size: 14px; color: rgba(255,255,255,0.7); text-align: center; }
+.celebrate-overlay button { max-width: 240px; margin-top: 12px; }
+
+/* ── 会员三列对比 ─────────── */
+.plan-grid {
+  display: flex; flex-direction: column; gap: 14px;
+}
+.plan-card {
+  background: var(--bg-elev1); border: 1px solid var(--border-soft);
+  border-radius: 20px; padding: 22px; position: relative;
+  transition: transform 0.2s;
+}
+.plan-card.popular {
+  border: 1.5px solid rgba(124,92,255,0.55);
+  box-shadow: 0 0 40px -8px rgba(124,92,255,0.35);
+}
+.plan-card.vip {
+  border-color: rgba(230,193,120,0.5);
+  background: linear-gradient(135deg, rgba(230,193,120,0.08), var(--bg-elev1));
+}
+.plan-card .popular-tag {
+  position: absolute; top: -10px; right: 16px;
+  background: linear-gradient(135deg, #7c5cff, #a78bfa);
+  color: #fff; font-size: 10px; font-weight: 800;
+  padding: 5px 10px; border-radius: 100px;
+  letter-spacing: 1px; text-transform: uppercase;
+  box-shadow: 0 4px 12px rgba(124,92,255,0.5);
+}
+.plan-card .plan-name {
+  font-size: 18px; font-weight: 700; color: var(--text);
+  letter-spacing: -0.01em; margin-bottom: 4px;
+}
+.plan-card .plan-pitch {
+  font-size: 12px; color: var(--text-dim); margin-bottom: 14px;
+}
+.plan-price-box { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+.plan-price { font-size: 32px; font-weight: 800; color: var(--text); letter-spacing: -0.02em; }
+.plan-price-unit { font-size: 13px; color: var(--text-dim); }
+.plan-price-old {
+  font-size: 13px; color: var(--text-mute);
+  text-decoration: line-through; text-decoration-color: rgba(255,100,100,0.5);
+}
+.plan-save {
+  display: inline-block; margin-bottom: 14px;
+  font-size: 11px; color: #fbbf24; font-weight: 700;
+  background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.25);
+  padding: 3px 10px; border-radius: 100px;
+}
+.plan-feat { padding: 8px 0; display: flex; gap: 10px; font-size: 13px; color: var(--text); line-height: 1.5; }
+.plan-feat .mark { color: #10b981; font-weight: 800; flex-shrink: 0; }
+.plan-feat.muted { color: var(--text-mute); }
+.plan-feat.muted .mark { color: var(--text-mute); }
+.plan-social-proof {
+  margin-top: 12px; padding: 10px 12px;
+  background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2);
+  border-radius: 10px;
+  font-size: 11px; color: #6ee7b7; font-weight: 600;
+  text-align: center;
+}
 </style>
 </head>
 <body>
@@ -641,6 +908,33 @@ textarea { resize: none; min-height: 140px; line-height: 1.6; }
     <div class="tier-badge" id="tier-badge">FREE</div>
   </div>
 
+  <!-- 今日老王格言 -->
+  <div class="daily-quote" id="daily-quote">
+    <div class="q-date" id="q-date">-</div>
+    <div class="q-text" id="q-text">-</div>
+    <div class="q-sig">— 老王</div>
+  </div>
+
+  <!-- 新手任务卡片（仅新用户） -->
+  <div class="onboarding-card" id="onboarding-card" style="display:none">
+    <h3 id="onb-title">🎁 3 步解锁 +200 积分 + 3天会员体验</h3>
+    <div class="sub" id="onb-sub">完成下面 3 步，立刻领取新手礼包</div>
+    <div class="onboarding-progress"><div class="fill" id="onb-fill" style="width:0%"></div></div>
+    <div id="onb-steps"></div>
+    <div id="onb-claim-wrap" style="display:none; margin-top:14px">
+      <button id="btn-claim-onboarding" onclick="claimOnboarding()">🎉 领取新手礼包</button>
+    </div>
+  </div>
+
+  <!-- 今日待办 -->
+  <div class="today-card" id="today-card" style="display:none">
+    <div class="head">
+      <h3 id="today-title">今日任务</h3>
+      <div class="ratio"><b id="today-done">0</b>/<span id="today-total">3</span> 已完成</div>
+    </div>
+    <div id="today-rows"></div>
+  </div>
+
   <div class="hero-stats">
     <div class="big-num" id="st-points">0</div>
     <div class="big-label">💎 总积分</div>
@@ -659,10 +953,11 @@ textarea { resize: none; min-height: 140px; line-height: 1.6; }
         <div class="l">成就数</div>
       </div>
     </div>
+    <div class="hero-narrative" id="hero-narrative" style="display:none"></div>
   </div>
 
   <div class="quick-actions">
-    <div class="qa-btn" onclick="doCheckin()">
+    <div class="qa-btn" onclick="doCheckin(event)">
       <div class="qa-icon">✅</div>
       <div class="qa-label">签到</div>
     </div>
@@ -712,7 +1007,7 @@ textarea { resize: none; min-height: 140px; line-height: 1.6; }
     <div class="back" onclick="openScreen('home')">←</div>
     <div class="title">💡 今日认知训练</div>
   </div>
-  <div id="cog-loading" class="loading">加载今日话题</div>
+  <div id="cog-loading" class="loading">老王正在选今日话题</div>
   <div id="cog-content" style="display:none">
     <div class="topic-box">
       <div class="title" id="cog-title">-</div>
@@ -760,7 +1055,7 @@ textarea { resize: none; min-height: 140px; line-height: 1.6; }
     <div class="back" onclick="openScreen('home')">←</div>
     <div class="title">📰 今日财经简报</div>
   </div>
-  <div id="news-loading" class="loading">加载今日简报</div>
+  <div id="news-loading" class="loading">老王正在翻财经媒体</div>
   <div id="news-content" style="display:none">
     <div class="feedback-box" id="news-result"></div>
   </div>
@@ -772,7 +1067,7 @@ textarea { resize: none; min-height: 140px; line-height: 1.6; }
     <div class="back" onclick="openScreen('home')">←</div>
     <div class="title" id="market-title">-</div>
   </div>
-  <div id="market-loading" class="loading">抓取市场数据中</div>
+  <div id="market-loading" class="loading">老王正在盯盘</div>
   <div id="market-content" style="display:none">
     <div class="feedback-box" id="market-result"></div>
   </div>
@@ -784,7 +1079,7 @@ textarea { resize: none; min-height: 140px; line-height: 1.6; }
     <div class="back" onclick="openScreen('home')">←</div>
     <div class="title">💡 老王持仓</div>
   </div>
-  <div id="portfolio-loading" class="loading">加载持仓</div>
+  <div id="portfolio-loading" class="loading">老王正在对账</div>
   <div id="portfolio-content" style="display:none"></div>
 </div>
 
@@ -1017,7 +1312,7 @@ textarea { resize: none; min-height: 140px; line-height: 1.6; }
     <div class="back" onclick="openScreen('home')">←</div>
     <div class="title">🏆 排行榜 · Top 10</div>
   </div>
-  <div id="lb-loading" class="loading">加载中</div>
+  <div id="lb-loading" class="loading">统计高手中</div>
   <div id="lb-list" class="card" style="padding:6px" ></div>
 </div>
 
@@ -1031,7 +1326,7 @@ textarea { resize: none; min-height: 140px; line-height: 1.6; }
     <div class="bal" id="shop-points">-</div>
     <div class="lab">💎 可用积分</div>
   </div>
-  <div id="shop-loading" class="loading">加载商品</div>
+  <div id="shop-loading" class="loading">老王正在摆货架</div>
   <div id="shop-sections"></div>
 </div>
 
@@ -1059,18 +1354,42 @@ textarea { resize: none; min-height: 140px; line-height: 1.6; }
       </div>
     </div>
     <div class="card">
-      <h3>邀请奖励规则</h3>
+      <h3>邀请 = 真金白银</h3>
+      <div style="font-size:13px; line-height:1.9; color:var(--text)">
+        <div style="padding:8px 0; border-bottom:1px solid var(--border-soft)">
+          ☕ 邀请 <strong>1 个</strong>朋友 = 一杯咖啡的积分
+        </div>
+        <div style="padding:8px 0; border-bottom:1px solid var(--border-soft)">
+          🎁 邀请 <strong>3 个</strong>朋友 = 解锁 <strong>3 天会员体验</strong>（会员等级以上）
+        </div>
+        <div style="padding:8px 0; border-bottom:1px solid var(--border-soft)">
+          💎 邀请 <strong>10 个</strong>朋友 = 半个月高级权限
+        </div>
+        <div style="padding:8px 0">
+          👑 邀请 <strong>50 个</strong>朋友 = 私董会月卡（价值 $99）
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>按你的身份，每次邀请可得</h3>
       <div class="info-row">
         <span class="k">🆓 免费用户</span>
-        <span class="v">双方各 10 积分</span>
+        <span class="v">你 10 + 朋友 10 积分</span>
       </div>
       <div class="info-row">
         <span class="k">💎 会员</span>
-        <span class="v">100 / 80 + 7天</span>
+        <span class="v">你 100 + 朋友 80 积分 + 7天会员</span>
       </div>
       <div class="info-row">
         <span class="k">👑 私董会</span>
-        <span class="v">200 / 150 + 7天</span>
+        <span class="v">你 200 + 朋友 150 积分 + 7天会员</span>
+      </div>
+    </div>
+    <div class="card" style="background:linear-gradient(135deg,rgba(124,92,255,0.12),rgba(167,139,250,0.05));border-color:rgba(124,92,255,0.3)">
+      <div style="font-size:12px; color:var(--text-dim); line-height:1.7">
+        💡 <strong style="color:var(--text)">老王说</strong>：邀请不是任务，是筛选。
+        你推荐给谁，就是认可他和你是同类。
+        把链接发给那个<strong style="color:var(--text)">最认真生活的朋友</strong>。
       </div>
     </div>
   </div>
@@ -1252,6 +1571,11 @@ async function loadHome() {
     badge.className = 'tier-badge ' + tier;
     badge.textContent = tier === 'admin' ? 'Admin' : tier === 'vip' ? 'VIP' : tier === 'member' ? 'Member' : 'Free';
 
+    renderDailyQuote();
+    renderHeroNarrative(me);
+    renderOnboarding(me.onboarding);
+    loadToday();  // 不阻塞首页渲染
+
     if (!features) {
       features = await api('/api/h5/features');
       H5_FEATURES_KEYS = [];
@@ -1260,9 +1584,201 @@ async function loadHome() {
       }
     }
     renderFeatures();
+    track('home_view', { tier, points: me.points });
   } catch (e) {
     toast(e.message);
   }
+}
+
+// ── 每日老王格言（固定数组 + 按日期轮换） ─────────────────
+const LAOWANG_QUOTES = [
+  "复利的真义不是金钱，是选择权。",
+  "身体是 1，其他都是后面的 0。",
+  "赚钱靠认知，守钱靠纪律，花钱靠品味。",
+  "90% 的焦虑，来自于你懂得太多但做得太少。",
+  "先把能做的做到极致，机会自己会来找你。",
+  "一个人的上限，是他最低能接受的标准。",
+  "不要用战术上的勤奋，掩盖战略上的懒惰。",
+  "你熬过的夜，终将成为别人看不懂的风景。",
+  "越是高手，越懂得做减法。",
+  "短期看运气，中期看能力，长期看人品。",
+  "不要在深夜做决定，不要在高兴时承诺。",
+  "投资最大的风险，是你不知道自己在做什么。",
+  "专注做 3 件事，比同时做 30 件事更有效。",
+  "真正的自由，是想做就做、想停就停的底气。",
+  "你害怕的事，多半只值得你紧张 10 分钟。",
+  "先成为你想吸引的那种人。",
+  "信息差就是金钱差，认知差就是阶层差。",
+  "别把运气当成本事，也别把本事当成运气。",
+  "今天不做的事，明天只会更难做。",
+  "健身房没人监督你，但你的身体全都记得。",
+  "别问 ROI，先问 Why。",
+  "输钱不可怕，输认知才真的可怕。",
+  "每天进步 1%，一年后就是 37 倍。",
+  "能睡好觉，比能赚大钱更稀缺。",
+];
+function renderDailyQuote() {
+  const d = new Date();
+  const dayOfYear = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000);
+  const q = LAOWANG_QUOTES[dayOfYear % LAOWANG_QUOTES.length];
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const weekday = ['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
+  $('q-date').textContent = `${mm}/${dd} · ${weekday} · 今日思考`;
+  $('q-text').textContent = q;
+}
+
+// ── Hero 动态数据叙事 ─────────────────
+function renderHeroNarrative(me) {
+  const el = $('hero-narrative');
+  const parts = [];
+  const days = me.weekly_active_days || 0;
+  if (days >= 1) parts.push(`本周已坚持 <strong>${days}</strong> 天`);
+  const beats = me.beats_percent || 0;
+  if (beats >= 20) parts.push(`超过 <strong>${beats}%</strong> 用户`);
+  if (me.checkin_streak >= 3) parts.push(`🔥 连续 <strong>${me.checkin_streak}</strong> 天，继续！`);
+  if (!parts.length) {
+    el.style.display = 'none'; return;
+  }
+  el.style.display = 'block';
+  el.innerHTML = parts.join(' · ');
+}
+
+// ── 新手任务卡片 ─────────────────
+function renderOnboarding(onb) {
+  const card = $('onboarding-card');
+  if (!onb || onb.claimed) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  const steps = [
+    { key: 'name',    label: '设置你的名字',   go: null,        done: onb.steps.name },
+    { key: 'checkin', label: '完成首次签到',   go: 'checkin',   done: onb.steps.checkin },
+    { key: 'health',  label: '完成健康打卡',   go: 'health',    done: onb.steps.health },
+  ];
+  const pct = Math.round(onb.completed / onb.total * 100);
+  $('onb-fill').style.width = pct + '%';
+  let html = '';
+  for (const s of steps) {
+    const icon = s.done ? '✓' : '○';
+    const action = (!s.done && s.go) ? `<span class="step-go" onclick="${s.go === 'checkin' ? 'doCheckin()' : `openScreen('${s.go}')`}">前往 →</span>` : '';
+    html += `<div class="onboarding-step ${s.done ? 'done' : ''}">
+      <span class="step-icon">${icon}</span>
+      <span class="step-label">${s.label}</span>
+      ${action}
+    </div>`;
+  }
+  $('onb-steps').innerHTML = html;
+  $('onb-claim-wrap').style.display = onb.can_claim ? 'block' : 'none';
+  if (onb.can_claim) {
+    $('onb-title').textContent = '🎉 3 步全部完成！';
+    $('onb-sub').textContent = '点击下方按钮领取你的新手礼包';
+  }
+}
+
+async function claimOnboarding() {
+  const btn = $('btn-claim-onboarding');
+  btn.disabled = true; btn.textContent = '领取中...';
+  try {
+    const r = await api('/api/h5/onboarding/claim', { method: 'POST' });
+    track('onboarding_claimed', { trial: r.trial_granted });
+    haptic(30);
+    flyPoints(btn, r.points_earned);
+    setTimeout(() => {
+      const msg = r.trial_granted ? `+200 积分 + ${r.trial_days}天会员体验 已到账！` : '+200 积分已到账！';
+      toast('🎁 ' + msg);
+      $('st-points').textContent = r.total_points;
+      $('onboarding-card').style.display = 'none';
+      // 刷新 tier badge（如果赠送了 trial）
+      if (r.trial_granted) {
+        const badge = $('tier-badge');
+        badge.className = 'tier-badge member';
+        badge.textContent = 'Member';
+      }
+    }, 800);
+  } catch (e) {
+    toast(e.message);
+    btn.disabled = false; btn.textContent = '🎉 领取新手礼包';
+  }
+}
+
+// ── Today 今日任务卡片 ─────────────────
+async function loadToday() {
+  try {
+    const t = await api('/api/h5/today');
+    renderTodayCard(t);
+  } catch (e) { /* 静默，不打扰用户 */ }
+}
+function renderTodayCard(t) {
+  if (!t || !t.items) return;
+  $('today-card').style.display = 'block';
+  $('today-done').textContent = t.done;
+  $('today-total').textContent = t.total;
+  let html = '';
+  for (const it of t.items) {
+    const action = it.done ? '' : (
+      it.key === 'checkin' ? 'onclick="doCheckin(event)"'
+      : `onclick="openScreen('${it.go}')"`
+    );
+    html += `<div class="today-row ${it.done ? 'done' : ''}" ${action}>
+      <span class="t-emoji">${it.emoji}</span>
+      <span class="t-label">${it.label}</span>
+      ${it.done ? '' : `<span class="t-pts">+${it.points}</span>`}
+      <span class="t-check"></span>
+    </div>`;
+  }
+  $('today-rows').innerHTML = html;
+}
+
+// ── 微交互辅助 ─────────────────
+function haptic(ms = 10) {
+  if (navigator.vibrate) { try { navigator.vibrate(ms); } catch (_) {} }
+}
+function flyPoints(fromEl, amount) {
+  const rect = fromEl ? fromEl.getBoundingClientRect() : { left: window.innerWidth/2, top: window.innerHeight/2, width: 0 };
+  const el = document.createElement('div');
+  el.className = 'pts-fly';
+  el.textContent = `+${amount}`;
+  el.style.left = (rect.left + rect.width/2) + 'px';
+  el.style.top = rect.top + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1300);
+}
+function showStreakMilestone(streak) {
+  const milestones = {7:'⭐',14:'💫',30:'💎',60:'🏆',100:'👑'};
+  const emoji = milestones[streak];
+  if (!emoji) return;
+  const titles = {7:'连续 7 天！',14:'半月达人！',30:'月度之星！',60:'钢铁意志！',100:'传奇玩家！'};
+  const subs = {
+    7:'一周的坚持 = 习惯雏形，继续',
+    14:'超过 85% 的用户放弃在这里',
+    30:'复利开始显现，一般人做不到',
+    60:'你已经进入 Top 1%',
+    100:'100天！你是老王的骄傲',
+  };
+  const overlay = document.createElement('div');
+  overlay.className = 'celebrate-overlay';
+  overlay.innerHTML = `
+    <div class="celebrate-emoji">${emoji}</div>
+    <div class="celebrate-title">${titles[streak]}</div>
+    <div class="celebrate-sub">${subs[streak]}</div>
+    <button onclick="this.parentElement.remove()">继续征程 →</button>
+  `;
+  document.body.appendChild(overlay);
+  haptic(80);
+}
+
+// ── 埋点 ─────────────────
+async function track(event, props) {
+  try {
+    fetch('/api/h5/events', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + (localStorage.getItem(STORAGE_KEY) || ''),
+      },
+      body: JSON.stringify({ event, props: props || {} }),
+      keepalive: true,
+    });
+  } catch (_) {}
 }
 
 function animateNumber(elId, target) {
@@ -1316,13 +1832,26 @@ function renderFeatures() {
 }
 
 // ── Daily Checkin ─────────────────
-async function doCheckin() {
+async function doCheckin(ev) {
   try {
     const r = await api('/api/h5/checkin', { method: 'POST' });
     if (r.success) {
-      toast(`✅ 签到成功 +${r.points_earned} 积分`);
+      haptic(15);
+      track('checkin', { streak: r.streak, lucky: r.lucky_bonus, total: r.points_earned });
+      // 尝试定位签到按钮作为飞字起点
+      const anchor = (ev && ev.target && ev.target.closest('.qa-btn'))
+        || document.querySelector('.qa-btn')
+        || document.querySelector('.today-row');
+      flyPoints(anchor, r.points_earned);
+      let msg = `✅ 签到成功 +${r.points_earned}`;
+      if (r.lucky_bonus > 0) msg += ` · ${r.lucky_label} +${r.lucky_bonus}`;
+      setTimeout(() => toast(msg), 400);
       $('st-points').textContent = r.total_points;
       $('st-streak').textContent = r.streak;
+      // 里程碑庆祝
+      showStreakMilestone(r.streak);
+      // 刷新 Today 卡片 + 新手任务状态
+      setTimeout(() => { loadToday(); loadHome(); }, 1200);
     } else {
       toast('今日已签到');
     }
@@ -1370,6 +1899,7 @@ async function submitCognition() {
 
 // ── Generic AI Feature ─────────────────
 async function openFeature(key, emoji, name) {
+  track('feature_open', { key, name });
   // Special screens
   const specialMap = {
     daily_cognition: 'cognition',
@@ -1540,24 +2070,113 @@ function showPlan(key) {
 }
 
 // ── Membership ─────────────
+// 本周动态数字（基于 ISO 周数，避免每次刷新跳变）
+function socialProofCount() {
+  const d = new Date();
+  const start = new Date(d.getFullYear(), 0, 1);
+  const week = Math.ceil(((d - start) / 86400000 + start.getDay() + 1) / 7);
+  // 稳定伪随机：本周一个数字，110 ~ 260 之间
+  return 110 + ((week * 37 + d.getFullYear()) % 150);
+}
+
 async function loadMembership() {
+  track('membership_view');
   try {
-    const d = await api('/api/h5/content/membership');
-    let html = '';
-    for (const t of d.data.tiers) {
-      html += `<div class="card" style="border: 1px solid ${t.key === 'vip' ? 'rgba(230,193,120,0.4)' : t.key === 'member' ? 'rgba(124,92,255,0.4)' : 'var(--border-soft)'}">
-        <h3 style="font-size: 16px; color:var(--text); text-transform:none; letter-spacing:0">${t.name}</h3>
-        <div class="sub" style="margin-bottom:14px; font-size: 14px">${t.price}</div>`;
-      for (const h of t.highlights) {
-        html += `<div style="padding:6px 0; display:flex; gap:10px"><span>✓</span><span style="flex:1">${h}</span></div>`;
+    const count = socialProofCount();
+    const currentTier = (currentUser && currentUser.membership_tier) || 'free';
+    const plans = [
+      {
+        key: 'free',
+        name: '🆓 免费',
+        pitch: '先试试看',
+        price: '0', unit: '永久',
+        oldPrice: null, save: null,
+        feats: [
+          { m: '✓', t: '每日签到 + 积分商城' },
+          { m: '✓', t: '基础 AI 功能预览（每日 3 次）' },
+          { m: '✓', t: '排行榜 + 社区观察' },
+          { m: '✕', t: '全部 51 个 AI 工具',    muted: true },
+          { m: '✕', t: '老王持仓 + 盘前情报',  muted: true },
+          { m: '✕', t: '老王训练计划库',        muted: true },
+        ],
+        cta: null,
+      },
+      {
+        key: 'member',
+        name: '💎 会员',
+        pitch: '适合认真玩的人',
+        popular: true,
+        price: '9.9', unit: '首月',
+        oldPrice: '79.9', save: '省 ¥70',
+        priceHint: '续费 $24.9/季 · $79.9/年',
+        feats: [
+          { m: '✓', t: '全部 51 个 AI 工具（每日 20 次）' },
+          { m: '✓', t: '创业财富 · 交易复盘 · 品牌销售' },
+          { m: '✓', t: '老王持仓季度快照 + 盘前盘后' },
+          { m: '✓', t: '老王训练计划库 5 套' },
+          { m: '✓', t: '挑战任务 + 战队 + 成绩单' },
+          { m: '✓', t: '优先排行榜 + 专属成就' },
+        ],
+        social: `本周已有 ${count} 位用户升级 ✨`,
+        cta: '升级会员',
+      },
+      {
+        key: 'vip',
+        name: '👑 私董会',
+        pitch: '顶配，直通老王',
+        vip: true,
+        price: '99', unit: '/月',
+        oldPrice: null,
+        priceHint: '季卡 $249 · 年卡 $899（送 1v1 咨询 1 次 · 价值 $109）',
+        feats: [
+          { m: '✓', t: '会员全部权益' },
+          { m: '🔴', t: '老王实时持仓 + 每笔交易推送' },
+          { m: '✓', t: '老王每周语音 + 私董会专属群' },
+          { m: '✓', t: '每月 1 次 15 分钟免费咨询' },
+          { m: '✓', t: '老王周报深度推送' },
+          { m: '✓', t: '优先响应 + VIP 客服' },
+        ],
+        cta: '加入私董会',
+      },
+    ];
+
+    let html = '<div class="plan-grid">';
+    for (const p of plans) {
+      const popularTag = p.popular ? '<div class="popular-tag">最多人选择</div>' : '';
+      const isCurrent = p.key === currentTier;
+      const cls = 'plan-card' + (p.popular ? ' popular' : '') + (p.vip ? ' vip' : '');
+      html += `<div class="${cls}">
+        ${popularTag}
+        <div class="plan-name">${p.name}${isCurrent ? ' · <span style="font-size:11px;color:#10b981">当前</span>' : ''}</div>
+        <div class="plan-pitch">${p.pitch}</div>
+        <div class="plan-price-box">
+          <span class="plan-price">$${p.price}</span>
+          <span class="plan-price-unit">${p.unit}</span>
+          ${p.oldPrice ? `<span class="plan-price-old">$${p.oldPrice}</span>` : ''}
+        </div>
+        ${p.save ? `<span class="plan-save">${p.save}</span>` : ''}
+        ${p.priceHint ? `<div class="sub" style="font-size:11px;margin-bottom:10px">${p.priceHint}</div>` : ''}
+        <div>`;
+      for (const f of p.feats) {
+        html += `<div class="plan-feat ${f.muted ? 'muted' : ''}"><span class="mark">${f.m}</span><span>${f.t}</span></div>`;
       }
-      if (t.key !== 'free') {
-        html += `<div style="height:12px"></div><button onclick="toast('请联系 @scorpia2004 开通')">开通 ${t.name}</button>`;
+      html += `</div>`;
+      if (p.social) html += `<div class="plan-social-proof">${p.social}</div>`;
+      if (p.cta && !isCurrent) {
+        html += `<div style="height:14px"></div>
+          <button onclick="upgradeClick('${p.key}')">${p.cta}</button>`;
       }
       html += '</div>';
     }
+    html += '</div>';
+    html += `<div class="sub" style="text-align:center; margin-top:20px; font-size:11px">支持微信 / 支付宝 · 7天无理由退款</div>`;
     $('membership-content').innerHTML = html;
   } catch (e) { toast(e.message); }
+}
+
+function upgradeClick(tier) {
+  track('membership_upgrade_click', { tier });
+  toast('请联系 @scorpia2004 开通 · 或扫码支付（建设中）');
 }
 
 // ── Report ─────────────
@@ -1910,6 +2529,8 @@ async function loadInvite() {
 }
 function copyInvite() {
   const link = $('invite-link').textContent;
+  track('invite_copy');
+  haptic(10);
   if (navigator.clipboard) {
     navigator.clipboard.writeText(link).then(() => toast('已复制'));
   } else {

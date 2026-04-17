@@ -459,7 +459,7 @@ async def h5_me(user: dict = Depends(get_h5_user)):
     row = db.table("users").select(
         "points, checkin_streak, health_streak, gym_count, badges, "
         "membership_status, membership_tier, membership_expires_at, "
-        "full_name, username"
+        "full_name, username, last_checkin_date"
     ).eq("id", user_id).maybe_single().execute()
 
     if not row or not row.data:
@@ -476,26 +476,191 @@ async def h5_me(user: dict = Depends(get_h5_user)):
 
     full_name = u.get("full_name") or ""
     username = u.get("username") or ""
+    badges = u.get("badges") or []
     # 微信初次登录创建的用户 full_name="微信用户" + username="wx_xxx"
     # 让他们首次进入时弹窗自定义名字
     needs_name_setup = (
         full_name in ("", "微信用户") and username.startswith("wx_")
     )
 
+    # ── 新手引导状态（3步） ─────────────────────────────────────
+    onboarding_claimed = "onboarding_done" in badges
+    step1_name = not needs_name_setup
+    step2_checkin = u.get("last_checkin_date") is not None
+    step3_health = (u.get("health_streak") or 0) >= 1
+    completed_count = sum([step1_name, step2_checkin, step3_health])
+    needs_onboarding = (not onboarding_claimed) and completed_count < 3
+    can_claim_onboarding = (not onboarding_claimed) and completed_count == 3
+
+    # ── 本周活跃度（用签到 streak 做粗略估算） ──────────────────
+    # 周一为一周开始（Asia/Shanghai 简化成 server 时区 +8）
+    today_cn = date.today()
+    weekday = today_cn.weekday()  # 0=Mon
+    week_start = (today_cn - timedelta(days=weekday)).isoformat()
+    checkin_this_week = db.table("checkin_logs").select(
+        "checkin_date", count="exact"
+    ).eq("user_id", user_id).gte("checkin_date", week_start).execute()
+    weekly_active_days = checkin_this_week.count or 0
+
+    # "超过 N%" 社会证明：根据 points 在活跃用户中的百分位
+    beats_percent = 0
+    user_points = u.get("points", 0) or 0
+    if user_points > 0:
+        total_active = db.table("users").select("id", count="exact").eq("is_active", True).execute()
+        weaker = db.table("users").select("id", count="exact").eq("is_active", True).lt("points", user_points).execute()
+        total = total_active.count or 1
+        beats_percent = int((weaker.count or 0) * 100 / total)
+
     return {
         "id": user_id,
         "name": full_name or username or str(user_id),
-        "points": u.get("points", 0) or 0,
+        "points": user_points,
         "checkin_streak": u.get("checkin_streak", 0) or 0,
         "health_streak": u.get("health_streak", 0) or 0,
         "gym_count": u.get("gym_count", 0) or 0,
-        "badges": u.get("badges") or [],
+        "badges": badges,
         "membership_status": u.get("membership_status", "free"),
         "membership_tier": u.get("membership_tier", "free"),
         "membership_expires_at": u.get("membership_expires_at"),
         "rank": rank,
         "needs_name_setup": needs_name_setup,
+        "onboarding": {
+            "needs": needs_onboarding,
+            "can_claim": can_claim_onboarding,
+            "claimed": onboarding_claimed,
+            "steps": {
+                "name": step1_name,
+                "checkin": step2_checkin,
+                "health": step3_health,
+            },
+            "completed": completed_count,
+            "total": 3,
+        },
+        "weekly_active_days": weekly_active_days,
+        "beats_percent": beats_percent,
     }
+
+
+@app.post("/api/h5/onboarding/claim")
+async def h5_onboarding_claim(user: dict = Depends(get_h5_user)):
+    """新手礼包领取：完成3步后给 +200 积分 + 3天会员体验。"""
+    user_id = user["id"]
+    db = get_client()
+    row = db.table("users").select(
+        "points, badges, membership_tier, membership_status, membership_expires_at, "
+        "last_checkin_date, health_streak, full_name, username"
+    ).eq("id", user_id).maybe_single().execute()
+    if not row or not row.data:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    u = row.data
+    badges = u.get("badges") or []
+    if "onboarding_done" in badges:
+        raise HTTPException(status_code=400, detail="新手礼包已领取")
+
+    full_name = u.get("full_name") or ""
+    username = u.get("username") or ""
+    name_done = not (full_name in ("", "微信用户") and username.startswith("wx_"))
+    checkin_done = u.get("last_checkin_date") is not None
+    health_done = (u.get("health_streak") or 0) >= 1
+    if not (name_done and checkin_done and health_done):
+        raise HTTPException(status_code=400, detail="请先完成全部3步")
+
+    # 发放奖励：200 积分 + 3天会员体验（仅 free 用户）
+    new_points = (u.get("points", 0) or 0) + 200
+    update_data = {
+        "points": new_points,
+        "badges": badges + ["onboarding_done"],
+    }
+    trial_granted = False
+    current_tier = u.get("membership_tier") or "free"
+    if current_tier == "free":
+        from datetime import datetime as _dt
+        existing_exp = u.get("membership_expires_at")
+        # 从 now 或 existing_exp 中取较大值 + 3天
+        base = _dt.utcnow()
+        if existing_exp:
+            try:
+                parsed = _dt.fromisoformat(str(existing_exp).replace("Z", "+00:00").replace("+00:00", ""))
+                if parsed > base:
+                    base = parsed
+            except Exception:
+                pass
+        new_exp = base + timedelta(days=3)
+        update_data["membership_tier"] = "member"
+        update_data["membership_status"] = "trial"
+        update_data["membership_expires_at"] = new_exp.isoformat()
+        trial_granted = True
+
+    db.table("users").update(update_data).eq("id", user_id).execute()
+
+    return {
+        "success": True,
+        "points_earned": 200,
+        "total_points": new_points,
+        "trial_granted": trial_granted,
+        "trial_days": 3 if trial_granted else 0,
+    }
+
+
+@app.get("/api/h5/today")
+async def h5_today(user: dict = Depends(get_h5_user)):
+    """聚合今日待办状态：签到 / 认知 / 健康 / 健身。"""
+    user_id = user["id"]
+    db = get_client()
+    today = date.today().isoformat()
+
+    # 签到
+    urow = db.table("users").select("last_checkin_date, checkin_streak").eq(
+        "id", user_id
+    ).maybe_single().execute()
+    u = urow.data if urow else None
+    checkin_done = (u or {}).get("last_checkin_date") == today
+    streak = (u or {}).get("checkin_streak", 0) or 0
+
+    # 健康打卡
+    try:
+        hrow = db.table("health_checkins").select("id").eq(
+            "user_id", user_id
+        ).eq("checkin_date", today).maybe_single().execute()
+        health_done = bool(hrow and hrow.data)
+    except Exception:
+        health_done = False
+
+    items = [
+        {"key": "checkin",  "emoji": "✅", "label": "每日签到",   "done": checkin_done, "points": 10, "go": "home"},
+        {"key": "health",   "emoji": "❤️", "label": "健康打卡",   "done": health_done,  "points": 10, "go": "health"},
+    ]
+    done_count = sum(1 for i in items if i["done"])
+    return {
+        "items": items,
+        "done": done_count,
+        "total": len(items),
+        "streak": streak,
+    }
+
+
+@app.post("/api/h5/events")
+async def h5_track_event(
+    payload: dict = Body(...),
+    user: dict = Depends(get_h5_user),
+):
+    """前端埋点事件写入 Supabase events 表（最小必要字段）。"""
+    user_id = user["id"]
+    event = (payload or {}).get("event", "").strip()[:64]
+    if not event:
+        return {"ok": True}  # 静默忽略空事件，避免前端报错
+    props = (payload or {}).get("props") or {}
+    try:
+        db = get_client()
+        db.table("events").insert({
+            "user_id": user_id,
+            "event": event,
+            "props": props,
+        }).execute()
+    except Exception as e:
+        # events 表可能还没建；静默失败不影响用户
+        logger.debug("event track failed: %s", e)
+    return {"ok": True}
 
 
 @app.post("/api/h5/profile/name")

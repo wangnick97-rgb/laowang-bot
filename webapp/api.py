@@ -474,9 +474,17 @@ async def h5_me(user: dict = Depends(get_h5_user)):
             rank = i + 1
             break
 
+    full_name = u.get("full_name") or ""
+    username = u.get("username") or ""
+    # 微信初次登录创建的用户 full_name="微信用户" + username="wx_xxx"
+    # 让他们首次进入时弹窗自定义名字
+    needs_name_setup = (
+        full_name in ("", "微信用户") and username.startswith("wx_")
+    )
+
     return {
         "id": user_id,
-        "name": u.get("full_name") or u.get("username") or str(user_id),
+        "name": full_name or username or str(user_id),
         "points": u.get("points", 0) or 0,
         "checkin_streak": u.get("checkin_streak", 0) or 0,
         "health_streak": u.get("health_streak", 0) or 0,
@@ -486,7 +494,26 @@ async def h5_me(user: dict = Depends(get_h5_user)):
         "membership_tier": u.get("membership_tier", "free"),
         "membership_expires_at": u.get("membership_expires_at"),
         "rank": rank,
+        "needs_name_setup": needs_name_setup,
     }
+
+
+@app.post("/api/h5/profile/name")
+async def h5_set_name(
+    payload: dict = Body(...),
+    user: dict = Depends(get_h5_user),
+):
+    """H5 用户自定义昵称（微信首次登录后用）。"""
+    user_id = user["id"]
+    name = (payload or {}).get("name", "").strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="请输入名字")
+    if len(name) > 20:
+        raise HTTPException(status_code=400, detail="名字太长了（最多20字）")
+
+    db = get_client()
+    db.table("users").update({"full_name": name}).eq("id", user_id).execute()
+    return {"ok": True, "name": name}
 
 
 @app.get("/api/h5/cognition/today")

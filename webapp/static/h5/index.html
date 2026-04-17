@@ -1097,6 +1097,18 @@ textarea { resize: none; min-height: 140px; line-height: 1.6; }
   </div>
 </div>
 
+<!-- ── 微信首次登录：设置名字弹窗 ─────── -->
+<div id="name-modal" style="display:none; position:fixed; inset:0; z-index:999; background:rgba(0,0,0,0.72); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); align-items:center; justify-content:center; padding:24px;">
+  <div class="glass" style="width:100%; max-width:360px; padding:28px; display:flex; flex-direction:column; gap:14px;">
+    <div style="font-size:32px; text-align:center">👋</div>
+    <h2 style="text-align:center; margin:0">欢迎来到老王工具箱</h2>
+    <p class="sub" style="text-align:center; margin:0">请先给自己起个名字吧</p>
+    <input id="name-input" placeholder="输入你的名字（最多20字）" maxlength="20" autocomplete="off" />
+    <div class="error" id="name-error" style="color:#ff6b6b; font-size:12px; min-height:16px; text-align:center"></div>
+    <button id="btn-save-name" onclick="saveName()">保存并开始使用</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1188,12 +1200,49 @@ function getGreeting() {
   return '夜深了';
 }
 
+function openNameModal() {
+  const m = $('name-modal');
+  m.style.display = 'flex';
+  $('name-error').textContent = '';
+  $('name-input').value = '';
+  setTimeout(() => $('name-input').focus(), 100);
+}
+function closeNameModal() {
+  $('name-modal').style.display = 'none';
+}
+async function saveName() {
+  const name = $('name-input').value.trim();
+  const errEl = $('name-error');
+  const btn = $('btn-save-name');
+  errEl.textContent = '';
+  if (!name) { errEl.textContent = '请输入名字'; return; }
+  if (name.length > 20) { errEl.textContent = '名字太长了（最多20字）'; return; }
+  btn.disabled = true;
+  btn.textContent = '保存中...';
+  try {
+    const r = await api('/api/h5/profile/name', {
+      method: 'POST',
+      body: JSON.stringify({ name }),
+    });
+    if (currentUser) currentUser.name = r.name;
+    $('user-name').textContent = r.name;
+    closeNameModal();
+    toast(`欢迎你，${r.name}`);
+  } catch (e) {
+    errEl.textContent = e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '保存并开始使用';
+  }
+}
+
 async function loadHome() {
   try {
     const me = await api('/api/h5/me');
     currentUser = me;
     $('greet-text').textContent = getGreeting() + '，欢迎回来';
     $('user-name').textContent = me.name;
+    if (me.needs_name_setup) openNameModal();
     animateNumber('st-points', me.points);
     $('st-streak').textContent = me.checkin_streak;
     $('st-rank').textContent = me.rank || '-';

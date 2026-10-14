@@ -92,6 +92,8 @@ ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE conversation_states ENABLE ROW LEVEL SECURITY;
 ALTER TABLE usage_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE checkin_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE consultation_bookings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE scheduler_logs ENABLE ROW LEVEL SECURITY;
 
 -- Bot 用 service role key，不需要额外 policy
 -- 以下 policy 供未来 Mini App 的 anon 用户使用：
